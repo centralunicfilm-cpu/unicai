@@ -1,0 +1,10 @@
+project_id = "ihexxwbejnjaawosgiby"
+
+[functions.elevenlabs-tts]
+verify_jwt = false
+
+[functions.youtube-download]
+verify_jwt = false
+
+[functions.generate-image]
+verify_jwt = false

@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================
+   UNICFILM DESIGN SYSTEM
+   Cinematic Black & Orange — #F28E38
+   ============================================= */
+
+@layer base {
+  :root {
+    /* Core Palette */
+    --background: 240 7% 5%;
+    --foreground: 0 0% 96%;
+
+    --card: 240 5% 8%;
+    --card-foreground: 0 0% 96%;
+
+    --popover: 240 5% 8%;
+    --popover-foreground: 0 0% 96%;
+
+    /* Orange #F28E38 as primary */
+    --primary: 28 88% 58%;
+    --primary-foreground: 240 7% 5%;
+
+    --secondary: 240 4% 12%;
+    --secondary-foreground: 0 0% 80%;
+
+    --muted: 240 4% 10%;
+    --muted-foreground: 0 0% 50%;
+
+    --accent: 28 88% 58%;
+    --accent-foreground: 240 7% 5%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 96%;
+
+    --border: 240 4% 14%;
+    --input: 240 4% 10%;
+    --ring: 28 88% 58%;
+
+    --radius: 0.75rem;
+
+    /* Unicfilm Custom Tokens */
+    --orange: 28 88% 58%;
+    --orange-glow: 28 88% 68%;
+    --orange-dim: 28 70% 40%;
+    --orange-hover: 28 82% 51%;
+    --orange-soft: 28 88% 58%;
+    --surface: 240 5% 8%;
+    --surface-elevated: 240 5% 11%;
+    --surface-hover: 240 4% 14%;
+    --text-primary: 0 0% 96%;
+    --text-secondary: 0 0% 60%;
+    --text-dim: 0 0% 35%;
+    --film-stripe: 240 5% 6%;
+
+    /* Shadows */
+    --shadow-orange: 0 0 20px hsl(28 88% 58% / 0.35), 0 0 60px hsl(28 88% 58% / 0.1);
+    --shadow-card: 0 4px 32px hsl(0 0% 0% / 0.5);
+    --shadow-button: 0 4px 15px hsl(28 88% 58% / 0.3);
+
+    /* Sidebar */
+    --sidebar-background: 240 7% 5%;
+    --sidebar-foreground: 0 0% 70%;
+    --sidebar-primary: 28 88% 58%;
+    --sidebar-primary-foreground: 240 7% 5%;
+    --sidebar-accent: 240 4% 10%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 240 4% 10%;
+    --sidebar-ring: 28 88% 58%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Bebas Neue', 'Inter', sans-serif;
+    letter-spacing: 0.05em;
+  }
+}
+
+/* =============================================
+   CINEMATIC ANIMATIONS
+   ============================================= */
+@layer utilities {
+  .btn-glow {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 8px hsl(28 88% 58% / 0.2);
+  }
+  .btn-glow:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: var(--shadow-orange);
+    filter: brightness(1.1);
+  }
+  .btn-glow:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .card-hover {
+    transition: all 0.25s ease;
+    border: 1px solid hsl(var(--border));
+  }
+  .card-hover:hover {
+    transform: translateY(-6px);
+    border-color: hsl(var(--orange));
+    box-shadow: 0 10px 30px hsl(28 88% 58% / 0.12);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 30px hsl(28 88% 58% / 0.5);
+  }
+
+  .film-strip {
+    background: repeating-linear-gradient(
+      90deg,
+      hsl(var(--film-stripe)) 0px,
+      hsl(var(--film-stripe)) 18px,
+      hsl(var(--border)) 18px,
+      hsl(var(--border)) 20px
+    );
+  }
+
+  .border-glow {
+    border: 1px solid hsl(var(--orange) / 0.5);
+    box-shadow: 0 0 12px hsl(28 88% 58% / 0.2) inset, 0 0 12px hsl(28 88% 58% / 0.1);
+  }
+
+  .pulse-dot {
+    animation: pulse-orange 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .nav-active {
+    background: hsl(var(--orange) / 0.08);
+    border-left: 3px solid hsl(var(--orange));
+    color: hsl(var(--orange));
+  }
+
+  .nav-item {
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover {
+    background: hsl(var(--orange) / 0.05);
+    border-left-color: hsl(var(--orange) / 0.4);
+    color: hsl(var(--foreground));
+    transform: translateX(2px);
+  }
+
+  .input-glow:focus {
+    border-color: hsl(var(--orange));
+    box-shadow: 0 0 0 2px hsl(28 88% 58% / 0.2);
+    outline: none;
+  }
+}
+
+@keyframes pulse-orange {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 hsl(28 88% 58% / 0.4); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 6px hsl(28 88% 58% / 0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.4s ease forwards;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: hsl(var(--background)); }
+::-webkit-scrollbar-thumb { background: hsl(var(--orange) / 0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--orange) / 0.6); }
+
+@keyframes logo-float {
+  0%, 100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: drop-shadow(0 0 18px hsl(var(--orange) / 0.22));
+  }
+  50% {
+    opacity: 1;
+    transform: translate3d(0, -6px, 0);
+    filter: drop-shadow(0 8px 24px hsl(var(--orange) / 0.28));
+  }
+}
+
+.logo-float {
+  animation: logo-float 5.5s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform, filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-float {
+    animation: none;
+  }
+}
