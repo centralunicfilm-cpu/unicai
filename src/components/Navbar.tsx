@@ -110,6 +110,15 @@ export default function Navbar() {
                                 </NavigationMenuItem>
 
                                 <NavigationMenuItem>
+                                    <Link
+                                        to="/prompts"
+                                        className="inline-flex h-10 items-center justify-center rounded-full px-5 text-xs font-bold tracking-[0.2em] uppercase text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                                    >
+                                        Prompts
+                                    </Link>
+                                </NavigationMenuItem>
+
+                                <NavigationMenuItem>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <button className="inline-flex h-10 items-center justify-center rounded-full px-4 text-xs font-bold tracking-[0.2em] uppercase text-white/50 hover:text-white hover:bg-white/5 transition-all">
@@ -248,13 +257,20 @@ export default function Navbar() {
                         </div>
                     </div>
 
-                    <div className="space-y-4 pt-6 border-t border-white/5">
+                    <div className="space-y-4 pt-6 border-t border-white/5 flex gap-3 flex-wrap">
                         <Link
                             to="/gallery"
                             onClick={() => setIsOpen(false)}
                             className="inline-flex items-center px-4 py-2 rounded-full border border-white/10 bg-white/5 text-[10px] font-bold tracking-[0.2em] uppercase text-white/70"
                         >
                             Galeria Pública
+                        </Link>
+                        <Link
+                            to="/prompts"
+                            onClick={() => setIsOpen(false)}
+                            className="inline-flex items-center px-4 py-2 rounded-full border border-orange/30 bg-orange/10 text-[10px] font-bold tracking-[0.2em] uppercase text-orange"
+                        >
+                            Prompts Cinema
                         </Link>
                     </div>
                 </div>

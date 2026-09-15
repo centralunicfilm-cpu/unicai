@@ -11,6 +11,7 @@ export interface CinematicPrompt {
   duration?: string;
   source: string;
   sourceUrl: string;
+  videos: string[];
 }
 
 const dur = (p: string): string | undefined => {
@@ -38,6 +39,7 @@ Dialogue Cue: He whispers "Focus" to himself.
 The starting lights turn Green. Both cars accelerate in perfect sync on the wet asphalt. Water sprays massively into the camera lens. Motion blur turns the stadium lights into long streaks of color.`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020515830874636716?s=20`,
+    videos: ["https://github.com/user-attachments/assets/76ffff91-3b2b-47c4-953c-f9ff75834fe7"],
   },
   {
     category: `Cinematic Film Styles`,
@@ -50,6 +52,7 @@ Duration: 15s.
 [10-15s] The Jump (The Climax). The rover hits a massive dune and launches into the air (Slow Motion). Silhouette against the dark storm. Lightning strikes within the dust cloud. Debris flies past the lens. Cut to black on impact.`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020794007291404726?s=20`,
+    videos: ["https://github.com/user-attachments/assets/1ab84150-de21-4d8b-bf26-340676b4f066"],
   },
   {
     category: `Cinematic Film Styles`,
@@ -82,6 +85,7 @@ Environment: Background is flowing city car lights forming elongated light trail
 [Technical Parameters]: Simulated handheld camera, shallow depth of field, color shift, emotionally intense.`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020415877993156966?s=20`,
+    videos: ["https://github.com/user-attachments/assets/a3be2f7e-a30b-4c7e-847b-447d315f6afe"],
   },
   {
     category: `Cinematic Film Styles`,
@@ -90,6 +94,7 @@ Environment: Background is flowing city car lights forming elongated light trail
     prompt: `A catastrophic collision between two massive space stations in low Earth orbit. Metal shears apart in slow motion as the stations grind into each other, sending a hailstorm of debris spiraling outward. Entire modules crumple like tin cans. Pressurized compartments blow out in violent bursts of crystallizing atmosphere. Solar panels shatter and cartwheel into the void. The camera tumbles through the wreckage as an astronaut ragdolls past, arms flailing. Explosions ripple down the station spine. Earth looms enormous in the background, serene and indifferent. Hyper-realistic, catastrophic scale, ISO debris field, 8k, Gravity collision sequence energy.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
+    videos: ["https://github.com/user-attachments/assets/8c6a15b7-0838-42f0-a03a-6a61194fd541", "https://github.com/user-attachments/assets/fe256b9d-59b3-4873-bef0-cd08492a224b", "https://github.com/user-attachments/assets/d059bc3e-bdab-4e3b-9618-4728c7023f06"],
   },
   {
     category: `Cinematic Film Styles`,
@@ -101,6 +106,7 @@ Environment: Background is flowing city car lights forming elongated light trail
 [12-15s]: Snap cut to extreme close-up, the samurai’s hand grips the katana hilt, knuckles white, a single drop of sweat falls in slow motion, the sound of a blade being drawn rings out, then dead silence. Hyper-realistic, 8k, Akira Kurosawa cinematography, Hans Zimmer sound design.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
+    videos: ["https://github.com/user-attachments/assets/2e2ade07-4550-4b90-a558-bbb693f06e8f", "https://github.com/user-attachments/assets/bb611dd2-d31c-44b5-8506-50dcfe3d0193"],
   },
   {
     category: `Cinematic Film Styles`,
@@ -109,6 +115,7 @@ Environment: Background is flowing city car lights forming elongated light trail
     prompt: `A close-up of a jazz pianist’s hands flying across the keys of a grand piano in a smoky nightclub. Each keystroke produces a visible ripple of warm amber light across the piano’s lacquered surface. The camera slowly pulls back to reveal the full band — upright bass, drums with brushes, a tenor saxophone. The musicians nod to each other, trading solos. Cigarette smoke curls through a single spotlight beam. Hyper-realistic, intimate jazz club atmosphere, 8k, the crisp attack of piano keys, walking bassline, brushed snare, breathy saxophone melody.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
+    videos: ["https://github.com/user-attachments/assets/8f0ca34c-183a-44c5-b5a8-7b5685557b92"],
   },
   {
     category: `Advertising & Commercial Branding`,
@@ -117,6 +124,7 @@ Environment: Background is flowing city car lights forming elongated light trail
     prompt: `Help me generate a promotional video about the MUJI brand.`,
     source: `歸藏(guizang.ai) ([@op7418](https://x.com/op7418))`,
     sourceUrl: `https://x.com/op7418/status/2021260675960504802?s=20`,
+    videos: ["https://github.com/user-attachments/assets/8ea42edb-d3c8-4fb8-8046-f59a3c1ddb1d"],
   },
   {
     category: `Advertising & Commercial Branding`,
@@ -125,6 +133,7 @@ Environment: Background is flowing city car lights forming elongated light trail
     prompt: `Based on the script from Image 1, generate advertising content for the perfume product in Image 2. The voiceover should reference a natural female voice speaking in English. Pay attention to the proportions of the perfume bottle, integrating it into the background with natural lighting. Avoid heavy texture overlay and cutout effects. The pace can be more brisk.`,
     source: `Vicky ([@BFAVicky](https://x.com/BFAVicky))`,
     sourceUrl: `https://x.com/BFAVicky/status/2020267913316561195?s=20`,
+    videos: ["https://github.com/user-attachments/assets/7c8e24b9-b203-417f-b18a-6a1611d7871a"],
   },
   {
     category: `Advertising & Commercial Branding`,
@@ -136,6 +145,7 @@ Environment: Background is flowing city car lights forming elongated light trail
 (12-15s) Seamless pull-out to hero frame, product centered, volumetric lighting, minimal cream background, elegant silence. Hyper-realistic, 8k, fashion commercial cinematography.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
+    videos: ["https://github.com/user-attachments/assets/a3251b68-4b36-4698-a042-e4f4a74b948d"],
   },
   {
     category: `Social Media & Viral Memes`,
@@ -156,6 +166,7 @@ The giant cat finally squeezes past the buildings and sits down on a cross-river
 Narrative sense: It lazily lies down and starts grooming itself, blocking the entire evening rush hour traffic. The camera finally freezes on its innocent big eyes.`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020717903134204344?s=20`,
+    videos: ["https://github.com/user-attachments/assets/2c0688fe-7733-4a20-8f1d-ec0d5c60527c"],
   },
   {
     category: `Social Media & Viral Memes`,
@@ -164,6 +175,7 @@ Narrative sense: It lazily lies down and starts grooming itself, blocking the en
     prompt: `A tight medium shot of two eccentric adults in typical, everyday clothing—one in a slightly oversized trench coat, the other in a weathered denim jacket—deep in a heated, animated conversation on a rainy West Village street corner. The one in the trench coat gestures wildly, the words “SOURDOUGH PRETZEL” appearing in pulsating electric blue: “It’s not just a pretzel, Arthur! It’s a sourdough pretzel!” The second guy says ‘Who cares. A pretzel’s a pretzel!’`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
+    videos: ["https://github.com/user-attachments/assets/b2642150-c6ff-48c5-b9b5-e33ed1f65862"],
   },
   {
     category: `UGC Style`,
@@ -185,6 +197,7 @@ Action: The protagonist, who has already walked to the door, seems to sense some
 Result: The mirror has now completely returned to normal, completely empty, only reflecting the opposite wall. The protagonist scratches her head in confusion, showing a life-questioning expression toward the camera. The frame freezes on the protagonist's confused face (comedy effect).`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020788951678607813?s=20`,
+    videos: ["https://github.com/user-attachments/assets/74c700e7-9371-4c1c-becf-ca3f9aadb357"],
   },
   {
     category: `UGC Style`,
@@ -193,6 +206,7 @@ Result: The mirror has now completely returned to normal, completely empty, only
     prompt: `[Image2] is in the interior of [Image1] where he is kept the style of [Image2], but the realism of [Image1] remains. He says [Audio1].`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
+    videos: ["https://github.com/user-attachments/assets/925597eb-104e-4c35-88d2-79fe07400513"],
   },
   {
     category: `Anime & Animation Styles`,
@@ -201,6 +215,7 @@ Result: The mirror has now completely returned to normal, completely empty, only
     prompt: `'Figure 1 character battling Figure 2 character in the World Martial Arts Tournament' with input image`,
     source: `露西的百宝箱 ([@Lucy_love_AI](https://x.com/Lucy_love_AI))`,
     sourceUrl: `https://x.com/Lucy_love_AI/status/2021037206585192749?s=20`,
+    videos: ["https://github.com/user-attachments/assets/aa723d28-994e-445d-a950-127903d9489b"],
   },
   {
     category: `Anime & Animation Styles`,
@@ -227,6 +242,7 @@ Transition Design: The shattered ice crystals transform into dancing red leaves 
 Visual Focus: Testing Seedance 2.0's logical continuity using particle continuity.`,
     source: `Adam also known as Jimmy ([@Adam38363368936](https://x.com/Adam38363368936))`,
     sourceUrl: `https://x.com/Adam38363368936/status/2020530975072264442`,
+    videos: ["https://github.com/user-attachments/assets/9f7dec03-a8c3-4dbb-96c2-0136f3105a9d"],
   },
   {
     category: `Anime & Animation Styles`,
@@ -235,28 +251,7 @@ Visual Focus: Testing Seedance 2.0's logical continuity using particle continuit
     prompt: `An anime where an otter goes into a large mech, with lots of quick shots of mechanical parts and gears turning. The otter gives a grim thumbs up, and then pilots the mech, flying into battle against an octopus made of marble.`,
     source: `Ethan Mollick ([@emollick](https://x.com/emollick))`,
     sourceUrl: `https://x.com/emollick/status/2021412306291392535?s=20`,
-  },
-  {
-    category: `Anime & Animation Styles`,
-    title: `4. X Bookmarks Pick: 10 Must-Try Animation Styles`,
-    description: `An X-bookmarked Seedance 2.0 style-consistency reference, useful as an inspiration index for animation workflows.`,
-    prompt: `Seedance 2.0 nails style consistency.
-
-10 must-try animation styles:
-
-1) Stylized 3D`,
-    source: `Framer ([@Framer_X](https://x.com/Framer_X))`,
-    sourceUrl: `https://x.com/Framer_X/status/2028144981631029408`,
-  },
-  {
-    category: `Anime & Animation Styles`,
-    title: `5. X Bookmarks Pick: Why Won’t It Stay?!`,
-    description: `Recent Seedance 2.0 video example found in X bookmarks.`,
-    prompt: `Why Won’t It Stay?! 🎬
-
-Seedance 2.0 Prompt shared below`,
-    source: `Latte (@0xbisc)*`,
-    sourceUrl: `https://x.com/0xbisc`,
+    videos: ["https://github.com/user-attachments/assets/eb9ef0cd-5f75-48ff-8268-fc3d05aa9d61"],
   },
   {
     category: `Anime & Animation Styles`,
@@ -265,6 +260,7 @@ Seedance 2.0 Prompt shared below`,
     prompt: `Create motion graphics animation inspired by traditional animation techniques. Based on the three examples shown, develop an animated sequence that captures the essence of classic animation while leveraging Seedance 2.0's advanced capabilities.`,
     source: `Vicky ([@BFAVicky](https://x.com/BFAVicky))`,
     sourceUrl: `https://x.com/BFAVicky/status/2020868594729398554?s=20`,
+    videos: ["https://github.com/user-attachments/assets/19ba595f-ac45-4288-b7b4-5dc387bdd648"],
   },
   {
     category: `Anime & Animation Styles`,
@@ -278,6 +274,7 @@ Foreground: On the left is a huge cypress tree, twisted like burning black flame
 Background: A sleeping town in the valley, windows of houses emit warm, circularly painted yellow light. The entire scene slowly flows and breathes following the direction of brushstrokes.`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020778466405159207?s=20`,
+    videos: ["https://github.com/user-attachments/assets/6a982ca0-e508-4759-847c-ce18bf245a88"],
   },
   {
     category: `Anime & Animation Styles`,
@@ -311,6 +308,7 @@ Power surges.
 Comedy and catastrophe collide.`,
     source: `nachos2d ([@NACHOS2D_](https://x.com/NACHOS2D_))`,
     sourceUrl: `https://x.com/NACHOS2D_/status/2021295886978908547?s=20`,
+    videos: ["https://github.com/user-attachments/assets/8ee52841-29be-4c1f-8079-964c4ed15f37"],
   },
   {
     category: `Anime & Animation Styles`,
@@ -319,6 +317,7 @@ Comedy and catastrophe collide.`,
     prompt: `Luffy coding on a Macbook on the Thousand Sunny, RAGING, then throwing it overboard.`,
     source: `BOOTOSHI ([@KingBootoshi](https://x.com/KingBootoshi))`,
     sourceUrl: `https://x.com/KingBootoshi/status/2021349878232907790?s=20`,
+    videos: ["https://github.com/user-attachments/assets/b5e2cc4c-9025-497e-a81c-3189d97b274b"],
   },
   {
     category: `Short-form Drama & Web Series`,
@@ -366,6 +365,7 @@ Style and atmosphere:
 **Aspect ratio:** 16:9`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020027994429911370?s=20`,
+    videos: ["https://github.com/user-attachments/assets/76a2b32a-a7c7-42f7-af08-ea7ddcf3fed9"],
   },
   {
     category: `Short-form Drama & Web Series`,
@@ -385,6 +385,7 @@ At the moment the female lead sees the object in her hand, her pupils shake (ext
 【Dialogue lip-sync guidance】Female lead sobs with her head down (silent/whimpering).`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020687040853975223?s=20`,
+    videos: [],
   },
   {
     category: `Short-form Drama & Web Series`,
@@ -406,6 +407,7 @@ The main door is kicked open, two rows of black-clad bodyguards rush in, kneelin
 【Dialogue lip-sync guidance】The butler shouts: "Welcome back, Dragon King (Young Master)! Family assets have been unfrozen!"`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020688711172620665?s=20`,
+    videos: ["https://github.com/user-attachments/assets/510355c2-6c53-4587-8f1a-9913a0a54bbb"],
   },
   {
     category: `Visual Effects & Experimental Styles`,
@@ -426,6 +428,7 @@ Only a corner of blue sky remains hanging in the sky. It turns out our living wo
 Ending: The camera rapidly pulls back to reveal that our entire world (city/wheat field) is actually just a **glass miniature landscape ball** on a giant's table. The giant is leaning in close to observe us.`,
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020727853281628276?s=20`,
+    videos: ["https://github.com/user-attachments/assets/ccf43991-7f39-4550-8845-4aff2cec3ed4"],
   },
   {
     category: `Visual Effects & Experimental Styles`,
@@ -434,6 +437,7 @@ Ending: The camera rapidly pulls back to reveal that our entire world (city/whea
     prompt: `Create fluid morphs between all of the photos`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
+    videos: ["https://github.com/user-attachments/assets/0833cba8-86b3-4f09-ba2c-b435319d8cd7"],
   },
   {
     category: `Visual Effects & Experimental Styles`,
@@ -442,6 +446,16 @@ Ending: The camera rapidly pulls back to reveal that our entire world (city/whea
     prompt: `A catastrophic collision between two massive space stations in low Earth orbit. Metal shears apart in slow motion as the stations grind into each other, sending a hailstorm of debris spiraling outward. Entire modules crumple like tin cans. Pressurized compartments blow out in violent bursts of crystallizing atmosphere. Solar panels shatter and cartwheel into the void. The camera tumbles through the wreckage as an isolated astronaut in a white EVA suit ragdolls past, arms flailing helplessly. Explosions ripple down the station’s spine. Earth looms enormous in the background, serene and indifferent. Hyper-realistic, catastrophic scale, orbital debris field, 8k, Gravity collision sequence energy.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
+    videos: ["https://github.com/user-attachments/assets/b83abbf5-81c9-4ab8-a196-b050a3207d8d"],
+  },
+  {
+    category: `Visual Effects & Experimental Styles`,
+    title: `4. Image-to-Video Physics Animation`,
+    description: `Two simple \`Animate this image\` examples that show physical motion in realistic and stylized scenes.`,
+    prompt: `Animate this image`,
+    source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
+    sourceUrl: `https://replicate.com/blog/seedance-2`,
+    videos: ["https://github.com/user-attachments/assets/0b615e52-1eff-4892-8b78-205816bfb873", "https://github.com/user-attachments/assets/99f1d923-b995-4bc7-ac6a-5fcf491ea7cd"],
   },
 ];
 

@@ -105,7 +105,18 @@ export default function Prompts() {
             {filtered.map((item) => {
               const isOpen = expanded.has(item.id);
               return (
-                <article key={item.id} className="rounded-2xl border border-white/10 bg-[hsl(var(--surface))] p-5 space-y-3 flex flex-col">
+                <article key={item.id} className="rounded-2xl border border-white/10 bg-[hsl(var(--surface))] overflow-hidden flex flex-col">
+                  {item.videos.length > 0 && (
+                    <div className="aspect-video bg-black/40">
+                      <video
+                        src={item.videos[0]}
+                        controls
+                        preload="none"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5 space-y-3 flex flex-col flex-1">
                   <div className="flex items-start gap-3">
                     <div className="min-w-0 flex-1">
                       <h3 className="text-sm font-bold text-white leading-snug">{cleanTitle(item.title)}</h3>
@@ -168,6 +179,7 @@ export default function Prompts() {
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     )}
+                  </div>
                   </div>
                 </article>
               );
