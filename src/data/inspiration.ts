@@ -7,7 +7,7 @@ export interface InspirationItem {
   folder: string;
 }
 
-export const INSPIRATION_BASE = 'https://raw.githubusercontent.com/centralunicfilm-cpu/unicai-assets/main/';
+export const INSPIRATION_BASE = 'https://raw.githubusercontent.com/centralunicfilm-cpu/-unicai-assets-/main/';
 
 export const INSPIRATION_ITEMS: InspirationItem[] = [
   { url: INSPIRATION_BASE + 'palco/jonsold-aerial-view-um-palco-de-show-modern-led-diamont-lambd-1.png', title: `Aerial view um palco de show modern led diamont lambd`, folder: 'palco' },
