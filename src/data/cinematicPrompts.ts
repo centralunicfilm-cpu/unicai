@@ -12,6 +12,7 @@ export interface CinematicPrompt {
   source: string;
   sourceUrl: string;
   videos: string[];
+  target?: "video" | "image";
 }
 
 const dur = (p: string): string | undefined => {
@@ -348,10 +349,82 @@ Ending: The camera rapidly pulls back to reveal that our entire world (city/whea
   },
 ];
 
-export const CINEMATIC_PROMPTS: CinematicPrompt[] = raw.map((item, index) => ({
-  ...item,
-  id: `cp-${index + 1}`,
-  duration: dur(item.prompt),
-}));
+const extra: CinematicPrompt[] = [
+  {
+    id: "cp-thumb-1",
+    category: `Thumbnails & Produto`,
+    title: `Capa social vertical 9:16`,
+    description: `Template de capa para Reels/TikTok/Shorts com espaço livre no topo para o título.`,
+    prompt: `[1 pessoa / 1 objeto] centralizado nos dois terços inferiores do quadro, [fundo forte da marca — gradiente marcante / bloco de cor / cena mínima], [clima de luz — lateral dramática / softbox de estúdio / neon rim-light], alto contraste, cores saturadas e marcantes, terço superior intencionalmente limpo para overlay do título, composição vertical 9:16 para thumbnail de rede social, legível em tamanho pequeno.`,
+    source: `MeiGen-AI-Design-MCP (MIT) por jau123`,
+    sourceUrl: `https://github.com/jau123/MeiGen-AI-Design-MCP`,
+    videos: [],
+    target: "image",
+  },
+  {
+    id: "cp-thumb-2",
+    category: `Thumbnails & Produto`,
+    title: `Variação foto-realista`,
+    description: `Direção alternativa: assunto real, luz real — par da capa social.`,
+    prompt: `Foto realista de [assunto], luz natural do mundo real, fundo [bloco de cor / cena mínima], alto contraste, cores marcantes, terço superior limpo para título, vertical 9:16, fotografia comercial nítida.`,
+    source: `MeiGen-AI-Design-MCP (MIT) por jau123`,
+    sourceUrl: `https://github.com/jau123/MeiGen-AI-Design-MCP`,
+    videos: [],
+    target: "image",
+  },
+  {
+    id: "cp-thumb-3",
+    category: `Thumbnails & Produto`,
+    title: `Variação ilustração estilizada`,
+    description: `Direção alternativa: vetor / flat / estilo pôster.`,
+    prompt: `Ilustração estilo pôster de [assunto], formas vetoriais chapadas, paleta marcante de [cores], fundo em bloco de cor com leve gradiente, alto contraste, terço superior limpo para título, vertical 9:16, design gráfico moderno.`,
+    source: `MeiGen-AI-Design-MCP (MIT) por jau123`,
+    sourceUrl: `https://github.com/jau123/MeiGen-AI-Design-MCP`,
+    videos: [],
+    target: "image",
+  },
+  {
+    id: "cp-thumb-4",
+    category: `Thumbnails & Produto`,
+    title: `Variação tipográfica`,
+    description: `Direção alternativa: texto gigante como protagonista da capa.`,
+    prompt: `Composição tipográfica marcante com a palavra "[PALAVRA]" gigante como protagonista, fundo [cor sólida / gradiente], letras com volume e sombra suave, alto contraste, elementos gráficos mínimos de apoio, vertical 9:16, design de capa impactante.`,
+    source: `MeiGen-AI-Design-MCP (MIT) por jau123`,
+    sourceUrl: `https://github.com/jau123/MeiGen-AI-Design-MCP`,
+    videos: [],
+    target: "image",
+  },
+  {
+    id: "cp-prod-1",
+    category: `Thumbnails & Produto`,
+    title: `Produto em cena lifestyle`,
+    description: `Foto editorial de produto em contexto natural, luz de golden hour.`,
+    prompt: `[produto com descrição a partir da referência], posicionado em [contexto natural adequado ao produto], luz suave de golden hour vindo do canto superior esquerdo, profundidade de campo rasa, fotografia editorial lifestyle, composição horizontal 4:3.`,
+    source: `MeiGen-AI-Design-MCP (MIT) por jau123`,
+    sourceUrl: `https://github.com/jau123/MeiGen-AI-Design-MCP`,
+    videos: [],
+    target: "image",
+  },
+  {
+    id: "cp-prod-2",
+    category: `Thumbnails & Produto`,
+    title: `Macro detalhe de produto`,
+    description: `Close extremo na textura/material para comercial de produto.`,
+    prompt: `Close-up macro extremo de [produto] mostrando [material — textura / acabamento / translucidez], iluminação dramática lateral de estúdio, foco nítido na textura, quadro quadrado 1:1, fotografia comercial de produto.`,
+    source: `MeiGen-AI-Design-MCP (MIT) por jau123`,
+    sourceUrl: `https://github.com/jau123/MeiGen-AI-Design-MCP`,
+    videos: [],
+    target: "image",
+  },
+];
+
+export const CINEMATIC_PROMPTS: CinematicPrompt[] = [
+  ...extra,
+  ...raw.map((item, index) => ({
+    ...item,
+    id: `cp-${index + 1}`,
+    duration: dur(item.prompt),
+  })),
+];
 
 export const PROMPT_CATEGORIES: string[] = [...new Set(CINEMATIC_PROMPTS.map((p) => p.category))];

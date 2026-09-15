@@ -12,6 +12,7 @@ import EngineSwitchNotice from "@/components/EngineSwitchNotice";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
 import { generateImageDirect, fileToDataUrl, loadLocalHistory, saveLocalHistoryItem } from "@/lib/runware";
 import { fetchAndCache, loadBlobUrl } from "@/lib/mediaCache";
+import { IMAGE_PREFILL_KEY } from "@/pages/Prompts";
 
 const styles = ["Cinematográfico", "Retrato", "Fantasia", "Minimalista", "Dramático", "Abstrato", "Realista", "Anime"];
 const ratios = ["1:1", "16:9", "9:16", "4:3", "3:4"];
@@ -67,6 +68,24 @@ export default function ImageGen() {
     setEngine(nextEngine);
     setError(null);
   };
+
+  // Prompt vindo da biblioteca (Prompts Cinemáticos)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(IMAGE_PREFILL_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { prompt?: string };
+        if (parsed.prompt) {
+          setPrompt(parsed.prompt);
+          toast.success("Prompt da biblioteca carregado!");
+        }
+        localStorage.removeItem(IMAGE_PREFILL_KEY);
+      }
+    } catch {
+      /* ignora */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!user) {

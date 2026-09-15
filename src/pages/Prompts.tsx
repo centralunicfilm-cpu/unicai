@@ -6,6 +6,7 @@ import { CINEMATIC_PROMPTS, PROMPT_CATEGORIES, type CinematicPrompt } from "@/da
 import { toast } from "sonner";
 
 export const VIDEO_PREFILL_KEY = "unicfilm.prefill.video";
+export const IMAGE_PREFILL_KEY = "unicfilm.prefill.image";
 
 const cleanTitle = (title: string) => title.replace(/^\d+\.\s*/, "");
 
@@ -49,9 +50,14 @@ export default function Prompts() {
     }
   };
 
-  const handleUseInVideo = (item: CinematicPrompt) => {
-    localStorage.setItem(VIDEO_PREFILL_KEY, JSON.stringify({ prompt: item.prompt }));
-    navigate("/video-gen");
+  const handleUse = (item: CinematicPrompt) => {
+    if (item.target === "image") {
+      localStorage.setItem(IMAGE_PREFILL_KEY, JSON.stringify({ prompt: item.prompt }));
+      navigate("/image-gen");
+    } else {
+      localStorage.setItem(VIDEO_PREFILL_KEY, JSON.stringify({ prompt: item.prompt }));
+      navigate("/video-gen");
+    }
   };
 
   return (
@@ -163,10 +169,10 @@ export default function Prompts() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleUseInVideo(item)}
+                      onClick={() => handleUse(item)}
                       className="flex-1 py-2.5 rounded-xl bg-orange text-white text-[10px] font-bold tracking-widest uppercase flex items-center justify-center gap-2 shadow-lg shadow-orange/20 hover:brightness-110 transition-all"
                     >
-                      <Wand2 className="w-4 h-4" /> Usar no vídeo
+                      <Wand2 className="w-4 h-4" /> {item.target === "image" ? "Usar na imagem" : "Usar no vídeo"}
                     </button>
                     {item.sourceUrl && (
                       <a
