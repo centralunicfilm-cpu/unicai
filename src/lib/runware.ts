@@ -7,6 +7,8 @@ export function getRunwareKey(): string | null {
 
 function mapImageModel(engine: string): string {
   const e = engine.toLowerCase();
+  if (e.includes("gpt") && e.includes("2.5")) return "openai:gpt-image@2.5-flare";
+  if (e.includes("muse")) return "meta:muse@image";
   if (e.includes("flux")) return "runware:101@1";
   if (e.includes("banana 2") || e.includes("banana pro")) return "google:4@3";
   if (e.includes("banana")) return "google:4@2";
@@ -47,7 +49,13 @@ export async function generateImageDirect(args: {
     outputFormat: "PNG",
     numberResults: 1,
   };
-  if (referenceImages.length) task.inputs = referenceImages.map((image) => ({ image }));
+  if (referenceImages.length) {
+    // Muse espera objeto { referenceImages }; as demais usam a lista [{ image }].
+    task.inputs =
+      model === "meta:muse@image"
+        ? { referenceImages }
+        : referenceImages.map((image) => ({ image }));
+  }
 
   const response = await fetch("https://api.runware.ai/v1", {
     method: "POST",

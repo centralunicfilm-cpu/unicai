@@ -17,18 +17,16 @@ const styles = ["Cinematogr√°fico", "Retrato", "Fantasia", "Minimalista", "Dram√
 const ratios = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const engines = [
   "GPT Image 2",
+  "GPT Image 2.5",
   "Nano Banana PRO",
   "Nano Banana 2",
+  "Nano Banana",
+  "Muse 2.5",
   "FLUX.1 Dev",
   "Midjourney V8.2",
-  "Firefly Image 5",
-  "Recraft V4 Pro",
-  "Ideogram 3.0",
-  "Stable Image Ultra",
-  "Nano Banana",
 ];
 
-const integratedEngines = new Set(["GPT Image 2", "FLUX.1 Dev", "Nano Banana", "Nano Banana 2", "Nano Banana PRO"]);
+const integratedEngines = new Set(["GPT Image 2", "GPT Image 2.5", "FLUX.1 Dev", "Nano Banana", "Nano Banana 2", "Nano Banana PRO", "Muse 2.5"]);
 
 interface ReferenceImage {
   url: string;
