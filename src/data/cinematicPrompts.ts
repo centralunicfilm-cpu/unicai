@@ -1,6 +1,7 @@
 // Prompts cinematográficos adaptados de awesome-seedance (MIT) por ZeroLu.
 // Fonte: https://github.com/ZeroLu/awesome-seedance
 // Uso: biblioteca de inspiração — toque para copiar ou enviar ao Gerar Vídeo.
+import { YOUMIND_PROMPTS } from "./youmindPrompts";
 
 export interface CinematicPrompt {
   id: string;
@@ -425,6 +426,11 @@ export const CINEMATIC_PROMPTS: CinematicPrompt[] = [
     id: `cp-${index + 1}`,
     duration: dur(item.prompt),
   })),
+];
+
+export const CINEMATIC_PROMPTS_ALL: CinematicPrompt[] = [
+  ...CINEMATIC_PROMPTS,
+  ...YOUMIND_PROMPTS,
 ];
 
 export const PROMPT_CATEGORIES: string[] = [...new Set(CINEMATIC_PROMPTS.map((p) => p.category))];

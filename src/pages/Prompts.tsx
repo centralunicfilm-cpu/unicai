@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Clapperboard, Search, Copy, Check, Wand2, ExternalLink, ChevronDown } from "lucide-react";
 import ToolPageLayout from "@/components/ToolPageLayout";
-import { CINEMATIC_PROMPTS, PROMPT_CATEGORIES, type CinematicPrompt } from "@/data/cinematicPrompts";
+import { CINEMATIC_PROMPTS_ALL, type CinematicPrompt } from "@/data/cinematicPrompts";
+
+const CINEMATIC_PROMPTS = CINEMATIC_PROMPTS_ALL;
+const PROMPT_CATEGORIES: string[] = [...new Set(CINEMATIC_PROMPTS.map((p) => p.category))];
 import { toast } from "sonner";
 
 export const VIDEO_PREFILL_KEY = "unicfilm.prefill.video";
@@ -196,9 +199,14 @@ export default function Prompts() {
 
         {/* Crédito */}
         <p className="text-center text-[10px] text-white/25 tracking-wide pt-2">
-          Prompts adaptados de <span className="text-white/40 font-bold">awesome-seedance</span> por ZeroLu (licença MIT) —{" "}
+          Prompts adaptados de <span className="text-white/40 font-bold">awesome-seedance</span> por ZeroLu (MIT) e{" "}
+          <span className="text-white/40 font-bold">ai-image-prompts-skill</span> por YouMind-OpenLab (MIT) —{" "}
           <a href="https://github.com/ZeroLu/awesome-seedance" target="_blank" rel="noopener noreferrer" className="text-orange/60 hover:text-orange transition-colors">
-            github.com/ZeroLu/awesome-seedance
+            seedance
+          </a>{" "}
+          ·{" "}
+          <a href="https://github.com/YouMind-OpenLab/ai-image-prompts-skill" target="_blank" rel="noopener noreferrer" className="text-orange/60 hover:text-orange transition-colors">
+            youmind
           </a>
         </p>
       </div>
