@@ -38,6 +38,7 @@ interface GeneratedVideo {
 export default function VideoGen() {
   const { user, profile } = useAuth();
   const [fullscreenUrl, setFullscreenUrl] = useState<string | null>(null);
+  const [fsGalIndex, setFsGalIndex] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
   const [engine, setEngine] = useState("MiniMax H3 Fast");
   const [engineFamily, setEngineFamily] = useState("MiniMax H3");
@@ -394,7 +395,7 @@ export default function VideoGen() {
 
           {generatedVideos.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {generatedVideos.map((video) => (
+              {generatedVideos.map((video, i) => (
                 <article key={video.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-[hsl(var(--surface))]">
                   <button
                     type="button"
@@ -414,6 +415,15 @@ export default function VideoGen() {
                   </button>
                   <div className="flex items-center gap-3 p-3">
                     <p className="min-w-0 flex-1 truncate text-xs text-white/60" title={video.prompt}>{video.prompt}</p>
+                    <button
+                      type="button"
+                      onClick={() => setFsGalIndex(i)}
+                      className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange"
+                      aria-label="Ver em tela cheia"
+                      title="Tela cheia"
+                    >
+                      <Maximize2 className="h-4 w-4" />
+                    </button>
                     <a
                       href={video.url}
                       download="unicfilm-video.mp4"
@@ -439,6 +449,17 @@ export default function VideoGen() {
           type="video"
           fileName="unicfilm-video.mp4"
           onClose={() => setFullscreenUrl(null)}
+        />
+      )}
+      {fsGalIndex !== null && generatedVideos[fsGalIndex] && (
+        <FullscreenViewer
+          url={generatedVideos[fsGalIndex].url}
+          type="video"
+          fileName="unicfilm-video.mp4"
+          onClose={() => setFsGalIndex(null)}
+          items={generatedVideos.map((v) => ({ url: v.url, type: "video" as const, fileName: "unicfilm-video.mp4" }))}
+          index={fsGalIndex}
+          onIndexChange={setFsGalIndex}
         />
       )}
     </ToolPageLayout>

@@ -45,6 +45,7 @@ interface GeneratedImage {
 export default function ImageGen() {
   const { user, profile } = useAuth();
   const [fullscreenUrl, setFullscreenUrl] = useState<string | null>(null);
+  const [fsGalIndex, setFsGalIndex] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
   const [engine, setEngine] = useState("Nano Banana");
   const [style, setStyle] = useState("Cinematográfico");
@@ -419,7 +420,7 @@ export default function ImageGen() {
 
             {generatedImages.length > 0 ? (
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                {generatedImages.map((image) => (
+                {generatedImages.map((image, i) => (
                   <article key={image.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-[hsl(var(--surface))]">
                     <button
                       type="button"
@@ -437,7 +438,7 @@ export default function ImageGen() {
                       <p className="min-w-0 flex-1 truncate text-xs text-white/60" title={image.prompt}>{image.prompt}</p>
                       <button
                         type="button"
-                        onClick={() => setFullscreenUrl(image.url)}
+                        onClick={() => setFsGalIndex(i)}
                         className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange"
                         aria-label="Ver em tela cheia"
                         title="Tela cheia"
@@ -472,6 +473,17 @@ export default function ImageGen() {
           type="image"
           fileName="unicfilm-image.png"
           onClose={() => setFullscreenUrl(null)}
+        />
+      )}
+      {fsGalIndex !== null && generatedImages[fsGalIndex] && (
+        <FullscreenViewer
+          url={generatedImages[fsGalIndex].url}
+          type="image"
+          fileName="unicfilm-image.png"
+          onClose={() => setFsGalIndex(null)}
+          items={generatedImages.map((g) => ({ url: g.url, type: "image" as const, fileName: "unicfilm-image.png" }))}
+          index={fsGalIndex}
+          onIndexChange={setFsGalIndex}
         />
       )}
     </ToolPageLayout>

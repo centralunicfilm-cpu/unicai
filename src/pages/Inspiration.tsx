@@ -15,7 +15,7 @@ const FOLDER_LABELS: Record<string, string> = {
 export default function Inspiration() {
   const [query, setQuery] = useState("");
   const [folder, setFolder] = useState<string>("all");
-  const [fullscreenUrl, setFullscreenUrl] = useState<string | null>(null);
+  const [fsIndex, setFsIndex] = useState<number | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -68,12 +68,12 @@ export default function Inspiration() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filtered.map((item) => (
+            {filtered.map((item, i) => (
               <article key={item.url} className="group overflow-hidden rounded-2xl border border-white/10 bg-[hsl(var(--surface))]">
                 <button
                   type="button"
-                  onClick={() => setFullscreenUrl(item.url)}
-                  className="relative block aspect-square w-full overflow-hidden bg-black/20 cursor-zoom-in"
+                  onClick={() => setFsIndex(i)}
+                  className="relative block aspect-video w-full overflow-hidden bg-black/20 cursor-zoom-in"
                   title={item.title}
                 >
                   <img
@@ -108,12 +108,15 @@ export default function Inspiration() {
         )}
       </div>
 
-      {fullscreenUrl && (
+      {fsIndex !== null && filtered[fsIndex] && (
         <FullscreenViewer
-          url={fullscreenUrl}
+          url={filtered[fsIndex].url}
           type="image"
           fileName="inspiracao-palco.png"
-          onClose={() => setFullscreenUrl(null)}
+          onClose={() => setFsIndex(null)}
+          items={filtered.map((item) => ({ url: item.url, type: "image" as const, fileName: "inspiracao-palco.png" }))}
+          index={fsIndex}
+          onIndexChange={setFsIndex}
         />
       )}
     </ToolPageLayout>

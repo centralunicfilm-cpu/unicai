@@ -35,7 +35,7 @@ export default function PublicGalleryPage() {
   const [activeFilter, setActiveFilter] = useState<GalleryFilter>(normalizeFilter(params.filter));
   const [items, setItems] = useState<ResolvedGalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [fullscreen, setFullscreen] = useState<ResolvedGalleryItem | null>(null);
+  const [fsIndex, setFsIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setActiveFilter(normalizeFilter(params.filter));
@@ -126,7 +126,7 @@ export default function PublicGalleryPage() {
 
         {!loading && filteredItems.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
+            {filteredItems.map((item, i) => (
               <article key={item.id} className="rounded-2xl overflow-hidden border border-[hsl(var(--border))] bg-[hsl(var(--surface))]">
                 <div className="aspect-video bg-[hsl(var(--background))] relative group">
                   {item.mediaType === "video" ? (
@@ -134,7 +134,7 @@ export default function PublicGalleryPage() {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => setFullscreen(item)}
+                      onClick={() => setFsIndex(i)}
                       className="block w-full h-full cursor-zoom-in"
                       title="Ver em tela cheia"
                     >
@@ -144,7 +144,7 @@ export default function PublicGalleryPage() {
                   <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       type="button"
-                      onClick={() => setFullscreen(item)}
+                      onClick={() => setFsIndex(i)}
                       className="p-2 rounded-lg bg-black/60 text-white/80 hover:text-white hover:bg-orange transition-colors"
                       aria-label="Tela cheia"
                       title="Tela cheia"
@@ -192,12 +192,19 @@ export default function PublicGalleryPage() {
         )}
       </section>
 
-      {fullscreen && (
+      {fsIndex !== null && filteredItems[fsIndex] && (
         <FullscreenViewer
-          url={fullscreen.displayUrl}
-          type={fullscreen.mediaType === "video" ? "video" : "image"}
-          fileName={fullscreen.mediaType === "video" ? "unicfilm-video.mp4" : "unicfilm-image.png"}
-          onClose={() => setFullscreen(null)}
+          url={filteredItems[fsIndex].displayUrl}
+          type={filteredItems[fsIndex].mediaType === "video" ? "video" : "image"}
+          fileName={filteredItems[fsIndex].mediaType === "video" ? "unicfilm-video.mp4" : "unicfilm-image.png"}
+          onClose={() => setFsIndex(null)}
+          items={filteredItems.map((entry) => ({
+            url: entry.displayUrl,
+            type: (entry.mediaType === "video" ? "video" : "image") as "video" | "image",
+            fileName: entry.mediaType === "video" ? "unicfilm-video.mp4" : "unicfilm-image.png",
+          }))}
+          index={fsIndex}
+          onIndexChange={setFsIndex}
         />
       )}
     </div>
