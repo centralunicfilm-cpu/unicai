@@ -111,7 +111,8 @@ export default function Prompts() {
                       <video
                         src={item.videos[0]}
                         controls
-                        preload="none"
+                        preload="metadata"
+                        playsInline
                         className="w-full h-full object-cover"
                       />
                     </div>

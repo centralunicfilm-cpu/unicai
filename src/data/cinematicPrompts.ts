@@ -94,7 +94,7 @@ Environment: Background is flowing city car lights forming elongated light trail
     prompt: `A catastrophic collision between two massive space stations in low Earth orbit. Metal shears apart in slow motion as the stations grind into each other, sending a hailstorm of debris spiraling outward. Entire modules crumple like tin cans. Pressurized compartments blow out in violent bursts of crystallizing atmosphere. Solar panels shatter and cartwheel into the void. The camera tumbles through the wreckage as an astronaut ragdolls past, arms flailing. Explosions ripple down the station spine. Earth looms enormous in the background, serene and indifferent. Hyper-realistic, catastrophic scale, ISO debris field, 8k, Gravity collision sequence energy.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/8c6a15b7-0838-42f0-a03a-6a61194fd541", "https://github.com/user-attachments/assets/fe256b9d-59b3-4873-bef0-cd08492a224b", "https://github.com/user-attachments/assets/d059bc3e-bdab-4e3b-9618-4728c7023f06"],
+    videos: [],
   },
   {
     category: `Cinematic Film Styles`,
@@ -106,7 +106,7 @@ Environment: Background is flowing city car lights forming elongated light trail
 [12-15s]: Snap cut to extreme close-up, the samurai’s hand grips the katana hilt, knuckles white, a single drop of sweat falls in slow motion, the sound of a blade being drawn rings out, then dead silence. Hyper-realistic, 8k, Akira Kurosawa cinematography, Hans Zimmer sound design.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/2e2ade07-4550-4b90-a558-bbb693f06e8f", "https://github.com/user-attachments/assets/bb611dd2-d31c-44b5-8506-50dcfe3d0193"],
+    videos: [],
   },
   {
     category: `Cinematic Film Styles`,
@@ -115,7 +115,7 @@ Environment: Background is flowing city car lights forming elongated light trail
     prompt: `A close-up of a jazz pianist’s hands flying across the keys of a grand piano in a smoky nightclub. Each keystroke produces a visible ripple of warm amber light across the piano’s lacquered surface. The camera slowly pulls back to reveal the full band — upright bass, drums with brushes, a tenor saxophone. The musicians nod to each other, trading solos. Cigarette smoke curls through a single spotlight beam. Hyper-realistic, intimate jazz club atmosphere, 8k, the crisp attack of piano keys, walking bassline, brushed snare, breathy saxophone melody.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/8f0ca34c-183a-44c5-b5a8-7b5685557b92"],
+    videos: [],
   },
   {
     category: `Advertising & Commercial Branding`,
@@ -145,7 +145,7 @@ Environment: Background is flowing city car lights forming elongated light trail
 (12-15s) Seamless pull-out to hero frame, product centered, volumetric lighting, minimal cream background, elegant silence. Hyper-realistic, 8k, fashion commercial cinematography.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/a3251b68-4b36-4698-a042-e4f4a74b948d"],
+    videos: [],
   },
   {
     category: `Social Media & Viral Memes`,
@@ -175,7 +175,7 @@ Narrative sense: It lazily lies down and starts grooming itself, blocking the en
     prompt: `A tight medium shot of two eccentric adults in typical, everyday clothing—one in a slightly oversized trench coat, the other in a weathered denim jacket—deep in a heated, animated conversation on a rainy West Village street corner. The one in the trench coat gestures wildly, the words “SOURDOUGH PRETZEL” appearing in pulsating electric blue: “It’s not just a pretzel, Arthur! It’s a sourdough pretzel!” The second guy says ‘Who cares. A pretzel’s a pretzel!’`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/b2642150-c6ff-48c5-b9b5-e33ed1f65862"],
+    videos: [],
   },
   {
     category: `UGC Style`,
@@ -206,7 +206,7 @@ Result: The mirror has now completely returned to normal, completely empty, only
     prompt: `[Image2] is in the interior of [Image1] where he is kept the style of [Image2], but the realism of [Image1] remains. He says [Audio1].`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/925597eb-104e-4c35-88d2-79fe07400513"],
+    videos: [],
   },
   {
     category: `Anime & Animation Styles`,
@@ -437,7 +437,7 @@ Ending: The camera rapidly pulls back to reveal that our entire world (city/whea
     prompt: `Create fluid morphs between all of the photos`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/0833cba8-86b3-4f09-ba2c-b435319d8cd7"],
+    videos: [],
   },
   {
     category: `Visual Effects & Experimental Styles`,
@@ -446,7 +446,7 @@ Ending: The camera rapidly pulls back to reveal that our entire world (city/whea
     prompt: `A catastrophic collision between two massive space stations in low Earth orbit. Metal shears apart in slow motion as the stations grind into each other, sending a hailstorm of debris spiraling outward. Entire modules crumple like tin cans. Pressurized compartments blow out in violent bursts of crystallizing atmosphere. Solar panels shatter and cartwheel into the void. The camera tumbles through the wreckage as an isolated astronaut in a white EVA suit ragdolls past, arms flailing helplessly. Explosions ripple down the station’s spine. Earth looms enormous in the background, serene and indifferent. Hyper-realistic, catastrophic scale, orbital debris field, 8k, Gravity collision sequence energy.`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/b83abbf5-81c9-4ab8-a196-b050a3207d8d"],
+    videos: [],
   },
   {
     category: `Visual Effects & Experimental Styles`,
@@ -455,7 +455,7 @@ Ending: The camera rapidly pulls back to reveal that our entire world (city/whea
     prompt: `Animate this image`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/0b615e52-1eff-4892-8b78-205816bfb873", "https://github.com/user-attachments/assets/99f1d923-b995-4bc7-ac6a-5fcf491ea7cd"],
+    videos: ["https://github.com/user-attachments/assets/99f1d923-b995-4bc7-ac6a-5fcf491ea7cd"],
   },
 ];
 
