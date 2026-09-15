@@ -14,6 +14,8 @@ export interface CinematicPrompt {
   sourceUrl: string;
   videos: string[];
   target?: "video" | "image";
+  thumbnail?: string;
+  needsReference?: boolean;
 }
 
 const dur = (p: string): string | undefined => {

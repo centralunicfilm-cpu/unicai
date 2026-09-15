@@ -21,6 +21,8 @@ The key visual: gigantic train + collapsing bridge + ocean storm + lightning + t
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788936827490_f9cp94_HRtrkUNa8AAqt_Z.jpg",
+    needsReference: false,
   },
   {
     id: `ym-33918`,
@@ -47,6 +49,8 @@ The key visual: gigantic train + collapsing bridge + ocean storm + lightning + t
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788936825426_kcpj97_HRtoEddbUAA6nJP.png",
+    needsReference: false,
   },
   {
     id: `ym-33787`,
@@ -58,6 +62,8 @@ The key visual: gigantic train + collapsing bridge + ocean storm + lightning + t
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788849676187_sa571z_HRqfmVuaoAAi1IB.jpg",
+    needsReference: true,
   },
   {
     id: `ym-33271`,
@@ -69,6 +75,8 @@ The key visual: gigantic train + collapsing bridge + ocean storm + lightning + t
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788418034299_oyrq26_HRO9qF1W0AUIeas.jpg",
+    needsReference: true,
   },
   {
     id: `ym-32844`,
@@ -80,6 +88,8 @@ The key visual: gigantic train + collapsing bridge + ocean storm + lightning + t
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1787985294128_4oxlwo_HQy_C7RbQAATwZP.jpg",
+    needsReference: false,
   },
   {
     id: `ym-32199`,
@@ -91,6 +101,8 @@ The key visual: gigantic train + collapsing bridge + ocean storm + lightning + t
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1787379861922_ovaxu5_HQQYLCUboAAIPjs.jpg",
+    needsReference: false,
   },
   {
     id: `ym-30436`,
@@ -102,6 +114,8 @@ The key visual: gigantic train + collapsing bridge + ocean storm + lightning + t
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1785568117051_2qk1u7_HOUvoOKXsAArLa_.jpg",
+    needsReference: true,
   },
   {
     id: `ym-30214`,
@@ -113,6 +127,8 @@ The key visual: gigantic train + collapsing bridge + ocean storm + lightning + t
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1785395942795_27fdn3_HOCZo_5WoAAiXCa.jpg",
+    needsReference: false,
   },
   {
     id: `ym-4031`,
@@ -124,6 +140,8 @@ The key visual: gigantic train + collapsing bridge + ocean storm + lightning + t
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1767455034932_ivuvu0_G9V-MszakAEAIBw.jpg",
+    needsReference: true,
   },
   {
     id: `ym-811`,
@@ -154,6 +172,8 @@ Aspect ratio is 3:4 vertical poster. Include vertical Japanese calligraphy descr
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1764915832381_renotr_G7FuPlzbYAAsuo2.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34672`,
@@ -178,6 +198,8 @@ Negative prompt: altered face, different identity, face reshaping, plastic skin,
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789454008137_roiqy9_HSLvkHzaAAAq5nL.jpg",
+    needsReference: true,
   },
   {
     id: `ym-34666`,
@@ -195,6 +217,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789390905671_8fa17b_HSLNeKqbEAAddLX.jpg",
+    needsReference: true,
   },
   {
     id: `ym-34454`,
@@ -206,6 +230,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789195066773_tvtcrk_HR8xTjCbkAA8nma.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34449`,
@@ -217,6 +243,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789195062158_k02ndk_HR_bO1sboAAr712.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34303`,
@@ -228,6 +256,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789195065438_0f7756_HR6JUKOaQAAcMGI.jpg",
+    needsReference: true,
   },
   {
     id: `ym-34305`,
@@ -239,6 +269,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789195067084_07410h_HR50kifb0AAUnZZ.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34452`,
@@ -329,6 +361,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789195063897_pocxr1_HR7kBT-a4AAqBCJ.png",
+    needsReference: false,
   },
   {
     id: `ym-34302`,
@@ -340,6 +374,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789108570135_pbl2mk_HR3nnAIXYAYSAvd.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34127`,
@@ -370,6 +406,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789022274242_rv1obo_HRyWMdrasAALKTi.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34128`,
@@ -381,6 +419,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789022275168_2wlw14_HRUR494W8AYxjfK.jpg",
+    needsReference: false,
   },
   {
     id: `ym-33917`,
@@ -441,6 +481,8 @@ opens its quiet, necessary hand.`,
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788936822673_fm4qn8_HRvAzvJbYAAcVxt.jpg",
+    needsReference: false,
   },
   {
     id: `ym-33918`,
@@ -467,6 +509,8 @@ opens its quiet, necessary hand.`,
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788936825426_kcpj97_HRtoEddbUAA6nJP.png",
+    needsReference: false,
   },
   {
     id: `ym-33793`,
@@ -478,6 +522,8 @@ opens its quiet, necessary hand.`,
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788849680107_zum17n_HRNLLI_WsAMl_sU.jpg",
+    needsReference: false,
   },
   {
     id: `ym-33776`,
@@ -489,6 +535,8 @@ opens its quiet, necessary hand.`,
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788849664398_fdmvog_HRnhR89bsAAhqzB.jpg",
+    needsReference: false,
   },
   {
     id: `ym-498`,
@@ -504,6 +552,8 @@ Title text: “In-depth explanation of Google’s new AI ‘Nano Banana Pro’�
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1763885651870_4szbai_G6VZiROagAAqsIh.jpg",
+    needsReference: false,
   },
   {
     id: `ym-532`,
@@ -531,6 +581,8 @@ https://t.co/QxbYpfFVj6`,
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1763885539326_yao7in_G6WBYReawAAcp2x.jpg",
+    needsReference: true,
   },
   {
     id: `ym-34671`,
@@ -546,6 +598,8 @@ Negative prompt: plastic skin, over-smoothed face, distorted hands, extra finger
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789454007201_1wcmgc_HSL6oZIbEAAYW7Q.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34672`,
@@ -570,6 +624,8 @@ Negative prompt: altered face, different identity, face reshaping, plastic skin,
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789454008137_roiqy9_HSLvkHzaAAAq5nL.jpg",
+    needsReference: true,
   },
   {
     id: `ym-34666`,
@@ -587,6 +643,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789390905671_8fa17b_HSLNeKqbEAAddLX.jpg",
+    needsReference: true,
   },
   {
     id: `ym-34660`,
@@ -598,6 +656,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789390901589_o23495_HSI6bkLaEAAx2z6.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34448`,
@@ -609,6 +669,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789195062208_3ev7w9_HR_hUZKbwAEhpHr.jpg",
+    needsReference: true,
   },
   {
     id: `ym-34444`,
@@ -620,6 +682,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789195057824_f9cjts_HR6jmoda0AA0HSL.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34120`,
@@ -631,6 +695,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789108568718_6msls5_HR1PnBZbQAALpe8.jpg",
+    needsReference: false,
   },
   {
     id: `ym-34132`,
@@ -656,6 +722,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1789022277328_vvwa7o_HRxBYM_XsAATlYx.jpg",
+    needsReference: false,
   },
   {
     id: `ym-33789`,
@@ -667,6 +735,8 @@ Outfit: Replace the beige suit with a soft ivory tailored oversized blazer, sati
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788849678329_xvvdbc_HRngPrWbMAESRUW.jpg",
+    needsReference: false,
   },
   {
     id: `ym-33479`,
@@ -690,6 +760,8 @@ Setting and Lighting: The background is a clean, seamless, off-white studio wall
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788591094276_5v5pbi_HRVdkfqbwAA-V0g.jpg",
+    needsReference: false,
   },
   {
     id: `ym-33485`,
@@ -701,6 +773,8 @@ Setting and Lighting: The background is a clean, seamless, off-white studio wall
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788591096587_rwpfat_HRRSM28a4AAcO-8.jpg",
+    needsReference: false,
   },
   {
     id: `ym-33381`,
@@ -712,6 +786,8 @@ Setting and Lighting: The background is a clean, seamless, off-white studio wall
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1788504566871_n6yb2d_HRS2IXGW8AQIgVE.jpg",
+    needsReference: false,
   },
   {
     id: `ym-32582`,
@@ -723,6 +799,8 @@ Setting and Lighting: The background is a clean, seamless, off-white studio wall
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1787725587170_ybmfk7_HQkQQPWXQAEWzlh.jpg",
+    needsReference: true,
   },
   {
     id: `ym-31658`,
@@ -734,5 +812,7 @@ Setting and Lighting: The background is a clean, seamless, off-white studio wall
     sourceUrl: `https://github.com/YouMind-OpenLab/ai-image-prompts-skill`,
     videos: [],
     target: "image",
+    thumbnail: "https://cms-assets.youmind.com/media/1787034148215_konuoa_HP5xPIWaQAAXOUa.jpg",
+    needsReference: false,
   },
 ];

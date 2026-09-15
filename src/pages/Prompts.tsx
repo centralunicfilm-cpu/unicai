@@ -115,7 +115,7 @@ export default function Prompts() {
               const isOpen = expanded.has(item.id);
               return (
                 <article key={item.id} className="rounded-2xl border border-white/10 bg-[hsl(var(--surface))] overflow-hidden flex flex-col">
-                  {item.videos.length > 0 && (
+                  {item.videos.length > 0 ? (
                     <div className="aspect-video bg-black/40">
                       <video
                         src={item.videos[0]}
@@ -125,7 +125,19 @@ export default function Prompts() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                  )}
+                  ) : item.thumbnail ? (
+                    <div className="aspect-video bg-black/40 overflow-hidden">
+                      <img
+                        src={item.thumbnail}
+                        alt={cleanTitle(item.title)}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    </div>
+                  ) : null}
                   <div className="p-5 space-y-3 flex flex-col flex-1">
                   <div className="flex items-start gap-3">
                     <div className="min-w-0 flex-1">
@@ -137,6 +149,11 @@ export default function Prompts() {
                         {item.duration && (
                           <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-white/50">
                             {item.duration}
+                          </span>
+                        )}
+                        {item.needsReference && (
+                          <span className="px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[9px] font-bold uppercase tracking-widest text-blue-400">
+                            Usa referência
                           </span>
                         )}
                       </div>
