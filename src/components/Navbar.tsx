@@ -119,6 +119,15 @@ export default function Navbar() {
                                 </NavigationMenuItem>
 
                                 <NavigationMenuItem>
+                                    <Link
+                                        to="/inspiracao"
+                                        className="inline-flex h-10 items-center justify-center rounded-full px-5 text-xs font-bold tracking-[0.2em] uppercase text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                                    >
+                                        Inspiração
+                                    </Link>
+                                </NavigationMenuItem>
+
+                                <NavigationMenuItem>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <button className="inline-flex h-10 items-center justify-center rounded-full px-4 text-xs font-bold tracking-[0.2em] uppercase text-white/50 hover:text-white hover:bg-white/5 transition-all">
