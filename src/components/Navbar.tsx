@@ -14,7 +14,8 @@ import {
     X,
     LayoutDashboard,
     Zap,
-    Download
+    Download,
+    Wifi
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -47,6 +48,7 @@ const studioItems = [
 const toolItems = [
     { title: "Configurações", href: "/settings", icon: Settings },
     { title: "Histórico", href: "/history", icon: Clock },
+    { title: "Rede Local", href: "/rede", icon: Wifi },
 ];
 
 export default function Navbar() {

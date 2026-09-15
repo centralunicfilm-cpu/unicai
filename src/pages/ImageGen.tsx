@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Image, Download, Loader2, Wand2, Images, MessagesSquare, Maximize2 } from "lucide-react";
 import FullscreenViewer from "@/components/FullscreenViewer";
 import { publishToGallery } from "@/lib/localGallery";
+import { sendChatMessage } from "@/lib/localChat";
+import { forwardChatToHost, forwardGalleryToHost } from "@/lib/lanSync";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import ToolPageLayout from "@/components/ToolPageLayout";
@@ -193,14 +195,15 @@ export default function ImageGen() {
     setPublishing(true);
     try {
       // Galeria pública local (neste Mac) — visível para as contas do Mac na página Galeria.
-      await publishToGallery({
+      const item = await publishToGallery({
         userId: user.id,
         fullName: profile?.full_name || "Membro",
         content: lastPrompt || prompt,
         sourceUrl: result,
         mediaType: "image",
       });
-      toast.success("Publicado na galeria deste Mac!");
+      forwardGalleryToHost(item);
+      toast.success("Publicado na galeria!");
     } catch (e: any) {
       toast.error(e?.message || "Erro ao publicar");
     } finally {
@@ -212,7 +215,17 @@ export default function ImageGen() {
     if (!result || !user) return;
     setSharingToChat(true);
     try {
-      toast.info("Chat da equipe desativado no modo local. Use DOWNLOAD para salvar.");
+      const inserted = await sendChatMessage({
+        userId: user.id,
+        fullName: profile?.full_name || "Membro",
+        content: lastPrompt || prompt,
+        sourceUrl: result,
+        mediaType: "image",
+      });
+      forwardChatToHost(inserted);
+      toast.success("Imagem e prompt enviados ao chat da equipe!");
+    } catch (e: any) {
+      toast.error(e?.message || "Erro ao enviar para o chat");
     } finally {
       setSharingToChat(false);
     }

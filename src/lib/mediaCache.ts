@@ -47,6 +47,28 @@ export async function loadBlobUrl(key: string): Promise<string | null> {
   }
 }
 
+export async function loadBlobDataUrl(key: string): Promise<string | null> {
+  try {
+    const db = await openDb();
+    const blob = await new Promise<Blob | undefined>((resolve, reject) => {
+      const tx = db.transaction(STORE, "readonly");
+      const req = tx.objectStore(STORE).get(key);
+      req.onsuccess = () => resolve(req.result as Blob | undefined);
+      req.onerror = () => reject(req.error);
+    });
+    db.close();
+    if (!blob) return null;
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchAndCache(url: string, key: string): Promise<string | null> {
   try {
     const resp = await fetch(url);

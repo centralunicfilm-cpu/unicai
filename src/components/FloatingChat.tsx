@@ -1,11 +1,13 @@
 import { forwardRef, Fragment, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { MessageSquare, X, Send, Image as ImageIcon, Video, Paperclip, Maximize2, Minimize2, Download } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { downloadOriginalMedia, isPublicGalleryContent, teamChatContent, visibleSharedContent } from "@/lib/sharedMedia";
+import { downloadOriginalMedia } from "@/lib/sharedMedia";
+import { resolveChat, sendChatMessage, subscribeChat, type ResolvedChatMessage } from "@/lib/localChat";
+import { forwardChatToHost, lanState, subscribeLan } from "@/lib/lanSync";
+import { fileToDataUrl } from "@/lib/runware";
 
 interface Message {
     id: string;
@@ -17,9 +19,6 @@ interface Message {
     media_type?: "image" | "video" | null;
     created_at: string;
 }
-
-const REQUEST_TIMEOUT_MS = 18000;
-const UPLOAD_TIMEOUT_MS = 60000;
 
 const GroupChatIcon = ({ className }: { className?: string }) => (
     <svg
@@ -44,21 +43,6 @@ const GroupChatIcon = ({ className }: { className?: string }) => (
         <path d="M40.2 33c1.1-1.3 2.7-2 4.8-2 3.8 0 6 2.3 6.5 7" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" opacity="0.75" />
     </svg>
 );
-
-function withTimeout<T>(operation: () => PromiseLike<T>, timeoutMs: number, timeoutMessage: string): Promise<T> {
-    return new Promise((resolve, reject) => {
-        const timer = window.setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
-
-        Promise.resolve(operation())
-            .then((result) => {
-                window.clearTimeout(timer);
-                resolve(result);
-            }, (error) => {
-                window.clearTimeout(timer);
-                reject(error);
-            });
-    });
-}
 
 function dayKey(dateIso: string) {
     const date = new Date(dateIso);
@@ -132,6 +116,8 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
     const [sendingMessage, setSendingMessage] = useState(false);
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: "image" | "video"; prompt: string } | null>(null);
+    const [lanInfo, setLanInfo] = useState(() => lanState());
+    const knownIdsRef = useRef<Set<string>>(new Set());
     const { user, profile } = useAuth();
     const scrollRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -165,105 +151,85 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
         if (isOpen && !isMinimized) setUnreadCount(0);
     }, [isOpen, isMinimized]);
 
+    const toUiMessage = (item: ResolvedChatMessage): Message => ({
+        id: item.id,
+        user_id: item.userId,
+        full_name: item.fullName,
+        avatar_url: null,
+        content: item.content,
+        media_url: item.displayUrl ?? item.mediaUrl,
+        media_type: item.mediaType,
+        created_at: item.createdAt,
+    });
+
     useEffect(() => {
         if (!user) {
             setMessages([]);
             setOnlineUsers([]);
             setLoadingMessages(false);
+            knownIdsRef.current = new Set();
             return;
         }
 
         let isMounted = true;
+        const myId = user.id;
 
-        const fetchMessages = async () => {
-            setLoadingMessages(true);
+        const load = async () => {
             try {
-                let response;
-                try {
-                    response = await withTimeout(
-                        () => supabase.from("messages").select("*").order("created_at", { ascending: true }).limit(300),
-                        REQUEST_TIMEOUT_MS,
-                        "A conexão com o chat demorou muito. Verifique sua internet e bloqueadores de extensão.",
-                    );
-                } catch {
-                    response = await withTimeout(
-                        () => supabase.from("messages").select("*").order("created_at", { ascending: true }).limit(150),
-                        REQUEST_TIMEOUT_MS,
-                        "Não foi possível carregar o chat agora.",
-                    );
-                }
-
-                const { data, error } = response;
-
-                if (error) throw error;
-
-                if (isMounted) {
-                    setMessages(
-                        ((data || []) as Message[])
-                            .filter((message) => !isPublicGalleryContent(message.content))
-                            .map((message) => ({ ...message, content: visibleSharedContent(message.content) })),
-                    );
-                    scrollToBottom();
-                }
-            } catch (error: any) {
-                console.error("Error fetching messages:", error);
-                if (isMounted) {
-                    toast.error(`Erro: ${error?.message || "Erro de conexão"}`);
-                }
-            } finally {
-                if (isMounted) {
-                    setLoadingMessages(false);
-                }
-            }
-        };
-
-        fetchMessages();
-
-        const channel = supabase.channel(`platform_chat_room`, {
-            config: { presence: { key: user.id } },
-        });
-
-        channel
-            .on("presence", { event: "sync" }, () => {
-                const state = channel.presenceState();
-                const users = Object.values(state).flat();
-                if (isMounted) setOnlineUsers(users);
-            })
-            .on(
-                "postgres_changes" as any,
-                { event: "INSERT", schema: "public", table: "messages" },
-                (payload: any) => {
-                    const nextMessage = payload.new as Message;
-                    if (!isMounted || isPublicGalleryContent(nextMessage.content)) return;
-
-                    nextMessage.content = visibleSharedContent(nextMessage.content);
-
-                    if (nextMessage.user_id !== user.id) {
+                const items = await resolveChat();
+                if (!isMounted) return;
+                const known = knownIdsRef.current;
+                const fresh = items.filter((item) => !known.has(item.id));
+                for (const item of fresh) {
+                    known.add(item.id);
+                    if (item.userId !== myId) {
                         playIncomingMessageSound();
                         if (!isOpenRef.current || isMinimizedRef.current) {
                             setUnreadCount((current) => current + 1);
                         }
                     }
-
-                    setMessages((prev) => (prev.some((item) => item.id === nextMessage.id) ? prev : [...prev, nextMessage]));
-                    scrollToBottom();
-                },
-            )
-            .subscribe(async (status) => {
-                if (status === "SUBSCRIBED") {
-                    await channel.track({
-                        user_id: user.id,
-                        full_name: currentNameRef.current,
-                        avatar_url: currentAvatarRef.current,
-                        online_at: new Date().toISOString(),
-                    });
                 }
-            });
+                setMessages(items.map(toUiMessage));
+                if (fresh.length > 0) scrollToBottom();
+            } catch (error) {
+                console.error("Error loading chat:", error);
+            }
+        };
+
+        const initial = async () => {
+            setLoadingMessages(true);
+            try {
+                const items = await resolveChat();
+                if (!isMounted) return;
+                knownIdsRef.current = new Set(items.map((item) => item.id));
+                setMessages(items.map(toUiMessage));
+                scrollToBottom();
+            } catch (error) {
+                console.error("Error loading chat:", error);
+            } finally {
+                if (isMounted) setLoadingMessages(false);
+            }
+        };
+
+        void initial();
+        setOnlineUsers(
+            lanState().clients.map((client) => ({ user_id: client.id, full_name: client.name })),
+        );
+        const offChat = subscribeChat(() => void load());
+        const offLan = subscribeLan(() => {
+            if (!isMounted) return;
+            const info = lanState();
+            setLanInfo(info);
+            setOnlineUsers(info.clients.map((client) => ({ user_id: client.id, full_name: client.name })));
+            void load();
+        });
 
         return () => {
             isMounted = false;
-            supabase.removeChannel(channel);
+            offChat();
+            offLan();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.id]);
 
     useEffect(() => {
@@ -273,23 +239,18 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
     const persistMessage = async (content: string, mediaUrl?: string, mediaType?: "image" | "video") => {
         if (!user) throw new Error("Usuário não autenticado");
 
-        const payload = {
-            user_id: user.id,
-            full_name: profile?.full_name || user.email?.split("@")[0] || "Usuário",
-            avatar_url: profile?.avatar_url || "",
-            content: teamChatContent(content),
-            media_url: mediaUrl || null,
-            media_type: mediaType || null,
-        };
-
-        const { data, error } = await withTimeout(
-            () => supabase.from("messages").insert(payload).select("*").single(),
-            REQUEST_TIMEOUT_MS,
-            "Não foi possível enviar mensagem agora. Tente novamente.",
-        );
-
-        if (error) throw error;
-        return data as Message;
+        const name = profile?.full_name || user.email?.split("@")[0] || "Usuário";
+        const inserted = await sendChatMessage({
+            userId: user.id,
+            fullName: name,
+            content,
+            sourceUrl: mediaUrl ?? null,
+            mediaType: mediaType ?? null,
+        });
+        // Espalha para os outros Macs quando conectado ao anfitrião.
+        forwardChatToHost(inserted);
+        knownIdsRef.current.add(inserted.id);
+        return toUiMessage({ ...inserted, displayUrl: mediaUrl ?? inserted.mediaUrl });
     };
 
     const handleSendMessage = async (e?: FormEvent, mediaUrl?: string, mediaType?: "image" | "video") => {
@@ -335,23 +296,11 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
         setUploading(true);
 
         try {
-            const fileExt = file.name.split(".").pop() || "bin";
-            const safeExt = fileExt.toLowerCase();
-            const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
-            const filePath = `${user.id}/chat/${fileName}`;
-
-            const { error: uploadError } = await withTimeout(
-                () => supabase.storage.from("media").upload(filePath, file, { upsert: false }),
-                UPLOAD_TIMEOUT_MS,
-                "Upload demorou muito. Tente novamente com um arquivo menor.",
-            );
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage.from("media").getPublicUrl(filePath);
+            // Modo local: converte para data URL e guarda neste Mac (IndexedDB).
+            const dataUrl = await fileToDataUrl(file);
             const resolvedMediaType: "image" | "video" = isVideo ? "video" : "image";
 
-            await handleSendMessage(undefined, data.publicUrl, resolvedMediaType);
+            await handleSendMessage(undefined, dataUrl, resolvedMediaType);
         } catch (error: any) {
             console.error("Upload error:", error);
             toast.error(error?.message || "Erro no upload do arquivo");
@@ -387,7 +336,11 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
                                 <h4 className="truncate text-[15px] font-medium leading-tight text-white">
                                     {profile?.full_name || user.email?.split("@")[0] || "Usuário"}
                                 </h4>
-                                <p className="mt-1 text-[10px] font-normal tracking-[0.08em] text-white/40">Chat geral</p>
+                                <p className="mt-1 text-[10px] font-normal tracking-[0.08em] text-white/40">
+                                    {lanInfo.state === "on"
+                                        ? `Rede • ${lanInfo.clients.length + 1} online`
+                                        : "Chat geral • neste Mac"}
+                                </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-1">

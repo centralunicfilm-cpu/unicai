@@ -74,3 +74,23 @@ export async function resolveGallery(): Promise<ResolvedGalleryItem[]> {
 export function removeFromGallery(id: string) {
   saveGallery(listGallery().filter((item) => item.id !== id));
 }
+
+// Mescla item vindo da rede (anfitrião) — sem duplicar. Retorna true se inseriu.
+export async function mergeGalleryItem(
+  item: LocalGalleryItem,
+  dataUrl?: string | null
+): Promise<boolean> {
+  const current = listGallery();
+  if (current.some((g) => g.id === item.id)) return false;
+  if (dataUrl) {
+    try {
+      const { cacheBlob } = await import("./mediaCache");
+      const resp = await fetch(dataUrl);
+      if (resp.ok) await cacheBlob(`gallery-${item.id}`, await resp.blob());
+    } catch {
+      /* segue com referência remota */
+    }
+  }
+  saveGallery([item, ...current]);
+  return true;
+}

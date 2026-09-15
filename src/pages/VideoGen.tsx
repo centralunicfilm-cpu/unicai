@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
 import { generateVideoDirect, loadLocalHistory, saveLocalHistoryItem } from "@/lib/runware";
 import { publishToGallery } from "@/lib/localGallery";
+import { sendChatMessage } from "@/lib/localChat";
+import { forwardChatToHost, forwardGalleryToHost } from "@/lib/lanSync";
 
 const videoStyles = [
   "Cinematográfico", "Documental", "Comercial", "Clip Musical",
@@ -121,17 +123,25 @@ export default function VideoGen() {
     try {
       if (destination === "gallery") {
         // Galeria pública local (neste Mac) — visível para as contas do Mac na página Galeria.
-        await publishToGallery({
+        const item = await publishToGallery({
           userId: user.id,
           fullName: profile?.full_name || "Membro",
           content: lastPrompt || prompt,
           sourceUrl: result,
           mediaType: "video",
         });
-        toast.success("Vídeo publicado na galeria deste Mac!");
+        forwardGalleryToHost(item);
+        toast.success("Vídeo publicado na galeria!");
       } else {
-        // Chat da equipe compartilhado via Supabase desativado no modo local.
-        toast.info("Chat da equipe desativado no modo local. Use DOWNLOAD para salvar.");
+        const inserted = await sendChatMessage({
+          userId: user.id,
+          fullName: profile?.full_name || "Membro",
+          content: lastPrompt || prompt,
+          sourceUrl: result,
+          mediaType: "video",
+        });
+        forwardChatToHost(inserted);
+        toast.success("Vídeo e prompt enviados ao chat da equipe!");
       }
     } catch (e: any) {
       toast.error(e?.message || "Não foi possível compartilhar o vídeo.");
