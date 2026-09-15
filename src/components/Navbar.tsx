@@ -15,7 +15,8 @@ import {
     LayoutDashboard,
     Zap,
     Download,
-    Wifi
+    Wifi,
+    Clapperboard
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -49,6 +50,7 @@ const toolItems = [
     { title: "Configurações", href: "/settings", icon: Settings },
     { title: "Histórico", href: "/history", icon: Clock },
     { title: "Rede Local", href: "/rede", icon: Wifi },
+    { title: "Prompts Cinema", href: "/prompts", icon: Clapperboard },
 ];
 
 export default function Navbar() {

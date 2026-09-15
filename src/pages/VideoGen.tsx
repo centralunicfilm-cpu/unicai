@@ -11,6 +11,7 @@ import { generateVideoDirect, loadLocalHistory, saveLocalHistoryItem } from "@/l
 import { publishToGallery } from "@/lib/localGallery";
 import { sendChatMessage } from "@/lib/localChat";
 import { forwardChatToHost, forwardGalleryToHost } from "@/lib/lanSync";
+import { VIDEO_PREFILL_KEY } from "@/pages/Prompts";
 
 const videoStyles = [
   "Cinematográfico", "Documental", "Comercial", "Clip Musical",
@@ -55,6 +56,24 @@ export default function VideoGen() {
   const engineNoticeCount = useRef(0);
   const [engineNotice, setEngineNotice] = useState({ open: false, previous: "", next: "" });
   const [generatedVideos, setGeneratedVideos] = useState<GeneratedVideo[]>([]);
+
+  // Prompt vindo da biblioteca (Prompts Cinemáticos)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(VIDEO_PREFILL_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { prompt?: string };
+        if (parsed.prompt) {
+          setPrompt(parsed.prompt);
+          toast.success("Prompt da biblioteca carregado!");
+        }
+        localStorage.removeItem(VIDEO_PREFILL_KEY);
+      }
+    } catch {
+      /* ignora */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!user) {

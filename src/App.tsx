@@ -29,6 +29,7 @@ import UserProfile from "./pages/UserProfile";
 import MyPlan from "./pages/MyPlan";
 import PublicGalleryPage from "./pages/PublicGalleryPage";
 import Network from "./pages/Network";
+import Prompts from "./pages/Prompts";
 
 const queryClient = new QueryClient();
 
@@ -93,6 +94,7 @@ function AppRoutes() {
           <Route path="/my-plan" element={<MyPlan />} />
           <Route path="/settings" element={<AccountSettings />} />
           <Route path="/rede" element={<Network />} />
+          <Route path="/prompts" element={<Prompts />} />
 
           {profile?.role === "admin_master" && <Route path="/admin" element={<AdminPanel />} />}
 
