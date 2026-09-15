@@ -1,41 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Filter, Image as ImageIcon, Video, Film, Download } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Filter, Image as ImageIcon, Film, Download, Maximize2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { downloadOriginalMedia, isGalleryEligibleContent, visibleSharedContent } from "@/lib/sharedMedia";
+import { downloadOriginalMedia } from "@/lib/sharedMedia";
+import FullscreenViewer from "@/components/FullscreenViewer";
+import { resolveGallery, removeFromGallery, type ResolvedGalleryItem } from "@/lib/localGallery";
 
 type GalleryFilter = "all" | "video" | "image" | "thumbnail" | "audio";
-
-interface GalleryItem {
-  id: string;
-  user_id: string;
-  full_name: string;
-  avatar_url: string | null;
-  content: string;
-  media_url: string;
-  media_type: "image" | "video" | "thumbnail" | "audio";
-  created_at: string;
-}
-
-const REQUEST_TIMEOUT_MS = 12000;
-
-function withTimeout<T>(operation: () => PromiseLike<T>, timeoutMs: number, timeoutMessage: string): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = window.setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
-    Promise.resolve(operation()).then(
-      (result) => {
-        window.clearTimeout(timer);
-        resolve(result);
-      },
-      (error) => {
-        window.clearTimeout(timer);
-        reject(error);
-      },
-    );
-  });
-}
 
 function normalizeFilter(value?: string): GalleryFilter {
   switch ((value || "").toLowerCase()) {
@@ -57,102 +29,45 @@ function normalizeFilter(value?: string): GalleryFilter {
   }
 }
 
-function inferMediaType(mediaType: string | null, mediaUrl: string): GalleryItem["media_type"] {
-  if (mediaType === "video") return "video";
-  if (mediaType === "image") return "image";
-
-  const lower = mediaUrl.toLowerCase();
-  if (lower.endsWith(".mp3") || lower.endsWith(".wav") || lower.endsWith(".m4a")) return "audio";
-  if (lower.includes("thumbnail")) return "thumbnail";
-  return "image";
-}
-
 export default function PublicGalleryPage() {
   const { user, profile } = useAuth();
   const params = useParams<{ filter?: string }>();
   const [activeFilter, setActiveFilter] = useState<GalleryFilter>(normalizeFilter(params.filter));
-  const [items, setItems] = useState<GalleryItem[]>([]);
+  const [items, setItems] = useState<ResolvedGalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fullscreen, setFullscreen] = useState<ResolvedGalleryItem | null>(null);
 
   useEffect(() => {
     setActiveFilter(normalizeFilter(params.filter));
   }, [params.filter]);
 
+  const loadItems = async () => {
+    setLoading(true);
+    try {
+      setItems(await resolveGallery());
+    } catch (error: any) {
+      console.error("Gallery load error:", error);
+      setItems([]);
+      toast.error(error?.message || "Erro ao carregar a galeria");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let mounted = true;
-
-    const loadGallery = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await withTimeout(
-          async () =>
-            await supabase
-              .from("messages")
-              .select("id,user_id,full_name,avatar_url,content,media_url,media_type,created_at")
-              .not("media_url", "is", null)
-              .order("created_at", { ascending: false })
-              .limit(300),
-          REQUEST_TIMEOUT_MS,
-          "Tempo excedido ao carregar a galeria pública.",
-        );
-
-        if (error) throw error;
-
-        if (mounted) {
-          const mapped = (data || [])
-            .filter((entry) => !!entry.media_url && isGalleryEligibleContent(entry.content))
-            .map((entry) => ({
-              id: entry.id,
-              user_id: entry.user_id,
-              full_name: entry.full_name || "Membro",
-              avatar_url: entry.avatar_url,
-              content: visibleSharedContent(entry.content),
-              media_url: entry.media_url as string,
-              media_type: inferMediaType(entry.media_type, entry.media_url as string),
-              created_at: entry.created_at,
-            }));
-
-          setItems(mapped);
-        }
-      } catch (error: any) {
-        console.error("Gallery load error:", error);
-        if (mounted) {
-          setItems([]);
-          toast.error(error?.message || "Erro ao carregar a galeria");
-        }
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    loadGallery();
-
-    const channel = supabase
-      .channel("public_gallery_messages")
-      .on("postgres_changes" as any, { event: "INSERT", schema: "public", table: "messages" }, (payload: any) => {
-        const next = payload.new;
-        if (!next?.media_url || !mounted || !isGalleryEligibleContent(next.content)) return;
-
-        const item: GalleryItem = {
-          id: next.id,
-          user_id: next.user_id,
-          full_name: next.full_name || "Membro",
-          avatar_url: next.avatar_url || null,
-          content: visibleSharedContent(next.content),
-          media_url: next.media_url,
-          media_type: inferMediaType(next.media_type, next.media_url),
-          created_at: next.created_at,
-        };
-
-        setItems((prev) => (prev.some((existing) => existing.id === item.id) ? prev : [item, ...prev]));
-      })
-      .subscribe();
-
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
-    };
+    loadItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleDelete = (id: string) => {
+    if (!confirm("Remover esta publicação da galeria deste Mac?")) return;
+    removeFromGallery(id);
+    setItems((prev) => prev.filter((item) => item.id !== id));
+    toast.success("Publicação removida.");
+  };
+
+  const canDelete = (item: ResolvedGalleryItem) =>
+    item.userId === user?.id || profile?.role === "admin_master";
 
   const filterOptions: { key: GalleryFilter; label: string }[] = [
     { key: "all", label: "Todos" },
@@ -164,7 +79,8 @@ export default function PublicGalleryPage() {
 
   const filteredItems = useMemo(() => {
     if (activeFilter === "all") return items;
-    return items.filter((item) => item.media_type === activeFilter);
+    if (activeFilter === "image") return items.filter((item) => item.mediaType === "image" || item.mediaType === "thumbnail");
+    return items.filter((item) => item.mediaType === activeFilter);
   }, [items, activeFilter]);
 
   return (
@@ -172,10 +88,10 @@ export default function PublicGalleryPage() {
       <header className="space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]">
           <Film className="w-3.5 h-3.5 text-primary" />
-          <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-[hsl(var(--text-secondary))]">Galeria Pública</span>
+          <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-[hsl(var(--text-secondary))]">Galeria deste Mac</span>
         </div>
         <h1 className="text-4xl md:text-5xl text-[hsl(var(--text-primary))]">Publicações da Equipe</h1>
-        <p className="text-sm text-[hsl(var(--text-secondary))]">Tudo o que for publicado no chat geral com mídia aparece aqui em tempo real.</p>
+        <p className="text-sm text-[hsl(var(--text-secondary))]">Tudo que a equipe publicar (imagem ou vídeo) aparece aqui neste Mac.</p>
       </header>
 
       <section className="space-y-5">
@@ -204,7 +120,7 @@ export default function PublicGalleryPage() {
 
         {!loading && filteredItems.length === 0 && (
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-10 text-center text-[hsl(var(--text-secondary))]">
-            Nenhuma publicação encontrada para este filtro.
+            Nenhuma publicação ainda. Gere uma imagem ou vídeo e clique em GALERIA para publicar aqui.
           </div>
         )}
 
@@ -212,38 +128,58 @@ export default function PublicGalleryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredItems.map((item) => (
               <article key={item.id} className="rounded-2xl overflow-hidden border border-[hsl(var(--border))] bg-[hsl(var(--surface))]">
-                <div className="aspect-video bg-[hsl(var(--background))]">
-                  {item.media_type === "video" ? (
-                    <video src={item.media_url} controls className="w-full h-full object-cover" preload="metadata" />
+                <div className="aspect-video bg-[hsl(var(--background))] relative group">
+                  {item.mediaType === "video" ? (
+                    <video src={item.displayUrl} controls className="w-full h-full object-cover" preload="metadata" />
                   ) : (
-                    <img src={item.media_url} alt={item.content || "Publicação da equipe"} className="w-full h-full object-cover" loading="lazy" />
+                    <button
+                      type="button"
+                      onClick={() => setFullscreen(item)}
+                      className="block w-full h-full cursor-zoom-in"
+                      title="Ver em tela cheia"
+                    >
+                      <img src={item.displayUrl} alt={item.content || "Publicação da equipe"} className="w-full h-full object-cover" loading="lazy" />
+                    </button>
                   )}
+                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => setFullscreen(item)}
+                      className="p-2 rounded-lg bg-black/60 text-white/80 hover:text-white hover:bg-orange transition-colors"
+                      aria-label="Tela cheia"
+                      title="Tela cheia"
+                    >
+                      {item.mediaType === "video" ? <Maximize2 className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
+                    </button>
+                    {canDelete(item) && (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(item.id)}
+                        className="p-2 rounded-lg bg-black/60 text-white/60 hover:text-red-400 transition-colors"
+                        aria-label="Remover"
+                        title="Remover"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full overflow-hidden border border-[hsl(var(--border))] bg-[hsl(var(--background))] flex items-center justify-center">
-                      {(item.user_id === user?.id ? profile?.avatar_url : item.avatar_url) ? (
-                        <img
-                          src={(item.user_id === user?.id ? profile?.avatar_url : item.avatar_url) || ""}
-                          alt={item.full_name}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <UserAvatarFallback name={item.full_name} />
-                      )}
+                      <UserAvatarFallback name={item.fullName} />
                     </div>
-                    <span className="text-xs font-semibold text-[hsl(var(--text-primary))]">{item.full_name}</span>
+                    <span className="text-xs font-semibold text-[hsl(var(--text-primary))]">{item.fullName}</span>
                     <span className="text-[10px] text-[hsl(var(--text-dim))] ml-auto">
-                      {new Date(item.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      {new Date(item.createdAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                   <p className="text-xs text-[hsl(var(--text-secondary))] line-clamp-2">{item.content || "Sem texto"}</p>
                   <button
                     type="button"
                     onClick={() => downloadOriginalMedia(
-                      item.media_url,
-                      item.media_type === "video" ? "unicfilm-video.mp4" : "unicfilm-image.png",
+                      item.displayUrl,
+                      item.mediaType === "video" ? "unicfilm-video.mp4" : "unicfilm-image.png",
                     )}
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-orange/30 bg-orange/10 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-orange transition-colors hover:bg-orange hover:text-white"
                   >
@@ -255,6 +191,15 @@ export default function PublicGalleryPage() {
           </div>
         )}
       </section>
+
+      {fullscreen && (
+        <FullscreenViewer
+          url={fullscreen.displayUrl}
+          type={fullscreen.mediaType === "video" ? "video" : "image"}
+          fileName={fullscreen.mediaType === "video" ? "unicfilm-video.mp4" : "unicfilm-image.png"}
+          onClose={() => setFullscreen(null)}
+        />
+      )}
     </div>
   );
 }

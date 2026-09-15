@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Image, Download, Loader2, Wand2, Images, MessagesSquare } from "lucide-react";
+import { Image, Download, Loader2, Wand2, Images, MessagesSquare, Maximize2 } from "lucide-react";
+import FullscreenViewer from "@/components/FullscreenViewer";
+import { publishToGallery } from "@/lib/localGallery";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import ToolPageLayout from "@/components/ToolPageLayout";
@@ -7,6 +9,7 @@ import ImageDropZone from "@/components/ImageDropZone";
 import EngineSwitchNotice from "@/components/EngineSwitchNotice";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
 import { generateImageDirect, fileToDataUrl, loadLocalHistory, saveLocalHistoryItem } from "@/lib/runware";
+import { fetchAndCache, loadBlobUrl } from "@/lib/mediaCache";
 
 const styles = ["Cinematográfico", "Retrato", "Fantasia", "Minimalista", "Dramático", "Abstrato", "Realista", "Anime"];
 const ratios = ["1:1", "16:9", "9:16", "4:3", "3:4"];
@@ -39,7 +42,8 @@ interface GeneratedImage {
 }
 
 export default function ImageGen() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const [fullscreenUrl, setFullscreenUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
   const [engine, setEngine] = useState("Nano Banana");
   const [style, setStyle] = useState("Cinematográfico");
@@ -69,15 +73,28 @@ export default function ImageGen() {
       setGeneratedImages([]);
       return;
     }
-    // Histórico local neste Mac (sem Supabase)
-    const items = loadLocalHistory(user.id, "image");
-    setGeneratedImages(items.map((item) => ({
-      id: item.id,
-      url: item.url,
-      prompt: item.prompt,
-      engine: item.engine,
-      createdAt: item.createdAt,
-    })));
+    // Histórico local neste Mac (sem Supabase).
+    // Prefere o arquivo cacheado no IndexedDB (a URL da Runware expira).
+    let cancelled = false;
+    (async () => {
+      const items = loadLocalHistory(user.id, "image");
+      const resolved = await Promise.all(
+        items.map(async (item) => {
+          const cached = await loadBlobUrl(`img-${item.id}`);
+          return {
+            id: item.id,
+            url: cached ?? item.url,
+            prompt: item.prompt,
+            engine: item.engine,
+            createdAt: item.createdAt,
+          };
+        })
+      );
+      if (!cancelled) setGeneratedImages(resolved);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const uploadReferenceImage = async (file: File) => {
@@ -133,11 +150,17 @@ export default function ImageGen() {
         referenceImages: validReferenceImages,
       });
 
-      setResult(imageUrl);
+      // Baixa e guarda o arquivo neste Mac (a URL da Runware é temporária).
+      // Preview e galeria passam a usar o arquivo local.
+      const imageId = crypto.randomUUID();
+      const localUrl = await fetchAndCache(imageUrl, `img-${imageId}`);
+      const displayUrl = localUrl ?? imageUrl;
+
+      setResult(displayUrl);
       setLastPrompt(prompt);
       const generatedImage: GeneratedImage = {
-        id: crypto.randomUUID(),
-        url: imageUrl,
+        id: imageId,
+        url: displayUrl,
         prompt,
         engine,
         createdAt: new Date().toISOString(),
@@ -169,10 +192,17 @@ export default function ImageGen() {
     if (!result || !user) return;
     setPublishing(true);
     try {
-      // Modo local: galeria pública compartilhada via Supabase desativada.
-      // O download continua disponível. Baixe e compartilhe manualmente.
-      void lastPrompt;
-      toast.info("Galeria pública desativada no modo local. Use DOWNLOAD para salvar.");
+      // Galeria pública local (neste Mac) — visível para as contas do Mac na página Galeria.
+      await publishToGallery({
+        userId: user.id,
+        fullName: profile?.full_name || "Membro",
+        content: lastPrompt || prompt,
+        sourceUrl: result,
+        mediaType: "image",
+      });
+      toast.success("Publicado na galeria deste Mac!");
+    } catch (e: any) {
+      toast.error(e?.message || "Erro ao publicar");
     } finally {
       setPublishing(false);
     }
@@ -303,6 +333,17 @@ export default function ImageGen() {
                 </div>
               )}
               {result && !loading && <img src={result} alt="Resultado" className="w-full h-full object-contain rounded-xl" />}
+              {result && !loading && (
+                <button
+                  type="button"
+                  onClick={() => setFullscreenUrl(result)}
+                  className="absolute top-3 right-3 p-2.5 rounded-xl bg-black/60 backdrop-blur text-white/70 hover:text-white hover:bg-orange transition-colors"
+                  aria-label="Ver em tela cheia"
+                  title="Tela cheia"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+              )}
               {error && !loading && (
                 <p className="text-[10px] font-bold tracking-widest text-white/40 uppercase p-4 text-center">{error}</p>
               )}
@@ -364,6 +405,15 @@ export default function ImageGen() {
                     </button>
                     <div className="flex items-center gap-3 p-3">
                       <p className="min-w-0 flex-1 truncate text-xs text-white/60" title={image.prompt}>{image.prompt}</p>
+                      <button
+                        type="button"
+                        onClick={() => setFullscreenUrl(image.url)}
+                        className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange"
+                        aria-label="Ver em tela cheia"
+                        title="Tela cheia"
+                      >
+                        <Maximize2 className="h-4 w-4" />
+                      </button>
                       <a
                         href={image.url}
                         download="unicfilm-image.png"
@@ -386,6 +436,14 @@ export default function ImageGen() {
           </section>
         </div>
       </div>
+      {fullscreenUrl && (
+        <FullscreenViewer
+          url={fullscreenUrl}
+          type="image"
+          fileName="unicfilm-image.png"
+          onClose={() => setFullscreenUrl(null)}
+        />
+      )}
     </ToolPageLayout>
   );
 }

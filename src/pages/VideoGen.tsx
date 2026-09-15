@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Video, Loader2, Wand2, Play, Download, Images, MessagesSquare } from "lucide-react";
+import { Video, Loader2, Wand2, Play, Download, Images, MessagesSquare, Maximize2 } from "lucide-react";
 import ToolPageLayout from "@/components/ToolPageLayout";
 import ImageDropZone from "@/components/ImageDropZone";
 import EngineSwitchNotice from "@/components/EngineSwitchNotice";
+import FullscreenViewer from "@/components/FullscreenViewer";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
 import { generateVideoDirect, loadLocalHistory, saveLocalHistoryItem } from "@/lib/runware";
+import { publishToGallery } from "@/lib/localGallery";
 
 const videoStyles = [
   "Cinematográfico", "Documental", "Comercial", "Clip Musical",
@@ -31,7 +33,8 @@ interface GeneratedVideo {
 }
 
 export default function VideoGen() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const [fullscreenUrl, setFullscreenUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
   const [engine, setEngine] = useState("MiniMax H3 Fast");
   const [engineFamily, setEngineFamily] = useState("MiniMax H3");
@@ -116,9 +119,22 @@ export default function VideoGen() {
     if (!result || !user) return;
     destination === "chat" ? setSharingToChat(true) : setPublishing(true);
     try {
-      void lastPrompt;
-      // Modo local: galeria/chat compartilhado via Supabase desativado.
-      toast.info("Compartilhamento desativado no modo local. Use DOWNLOAD para salvar.");
+      if (destination === "gallery") {
+        // Galeria pública local (neste Mac) — visível para as contas do Mac na página Galeria.
+        await publishToGallery({
+          userId: user.id,
+          fullName: profile?.full_name || "Membro",
+          content: lastPrompt || prompt,
+          sourceUrl: result,
+          mediaType: "video",
+        });
+        toast.success("Vídeo publicado na galeria deste Mac!");
+      } else {
+        // Chat da equipe compartilhado via Supabase desativado no modo local.
+        toast.info("Chat da equipe desativado no modo local. Use DOWNLOAD para salvar.");
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Não foi possível compartilhar o vídeo.");
     } finally {
       destination === "chat" ? setSharingToChat(false) : setPublishing(false);
     }
@@ -280,6 +296,17 @@ export default function VideoGen() {
             {result && !loading && (
               <video src={result} className="w-full h-full object-contain rounded-xl" controls autoPlay />
             )}
+            {result && !loading && (
+              <button
+                type="button"
+                onClick={() => setFullscreenUrl(result)}
+                className="absolute top-3 right-3 p-2.5 rounded-xl bg-black/60 backdrop-blur text-white/70 hover:text-white hover:bg-orange transition-colors z-10"
+                aria-label="Ver em tela cheia"
+                title="Tela cheia"
+              >
+                <Maximize2 className="w-4 h-4" />
+              </button>
+            )}
             {error && !loading && (
               <div className="flex flex-col items-center gap-4 text-center p-6">
                 <div className="w-16 h-16 rounded-full border border-orange/20 bg-orange/5 flex items-center justify-center">
@@ -377,6 +404,14 @@ export default function VideoGen() {
           )}
         </section>
       </div>
+      {fullscreenUrl && (
+        <FullscreenViewer
+          url={fullscreenUrl}
+          type="video"
+          fileName="unicfilm-video.mp4"
+          onClose={() => setFullscreenUrl(null)}
+        />
+      )}
     </ToolPageLayout>
   );
 }
