@@ -151,7 +151,7 @@ export default function PublicGallery() {
                 <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-orange animate-pulse" />
                     <h3 className="text-xl md:text-2xl font-display tracking-[0.25em] uppercase text-white drop-shadow-[0_0_15px_rgba(242,142,56,0.3)]">
-                        Galeria Pública da Comunidade
+                        Galeria Geral
                     </h3>
                 </div>
                 <div className="flex gap-2">

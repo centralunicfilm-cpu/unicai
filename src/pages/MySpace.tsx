@@ -48,6 +48,9 @@ export default function MySpace() {
       if (logsRes.data) setLogs(logsRes.data);
       if (profileRes.data) setProfile(profileRes.data);
       setLoading(false);
+    }).catch((err) => {
+      console.error("Meu Espaço: falha ao carregar (modo local usa histórico do Gerar Imagem/Vídeo):", err);
+      setLoading(false);
     });
   }, [user]);
 
