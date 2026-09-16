@@ -151,8 +151,8 @@ export default function Auth() {
                 <button onClick={() => { setMode("forgot"); setMessage(null); }} className="text-xs text-[hsl(var(--text-dim))] hover:text-orange transition-colors">
                   Esqueceu a senha? Redefinir neste Mac
                 </button>
-                <button onClick={() => { setMode("signup"); setMessage(null); }} className="mt-1 w-full py-3 rounded-xl border border-orange/40 bg-orange/10 text-sm font-bold tracking-widest uppercase text-orange hover:bg-orange hover:text-white transition-all">
-                  Criar conta • Primeiro acesso neste Mac
+                <button onClick={() => { setMode("signup"); setMessage(null); }} className="mt-1 w-full py-2 rounded-xl border border-orange/40 bg-orange/10 text-xs font-bold tracking-widest uppercase text-orange hover:bg-orange hover:text-white transition-all">
+                  Criar conta • Primeiro acesso aqui
                 </button>
               </>
             )}
