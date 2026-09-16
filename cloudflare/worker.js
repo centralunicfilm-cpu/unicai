@@ -35,6 +35,153 @@ function dataUrlToBytes(dataUrl) {
   return bytes;
 }
 
+// Mesmos modelos do app (src/lib/runware.ts).
+function mapImageModel(engine) {
+  const e = String(engine || "").toLowerCase();
+  if (e.includes("gpt") && e.includes("2.5")) return "openai:gpt-image@2.5-flare";
+  if (e.includes("muse")) return "meta:muse@image";
+  if (e.includes("flux")) return "runware:101@1";
+  if (e.includes("banana 2") || e.includes("banana pro")) return "google:4@3";
+  if (e.includes("banana")) return "google:4@2";
+  return "openai:gpt-image@2";
+}
+
+const VIDEO_MODELS = {
+  "MiniMax H3": "minimax:h3@0",
+  "MiniMax H3 Fast": "minimax:h3@fast",
+  "MiniMax H3 Max": "minimax:h3@max",
+  "MiniMax H3 Max Turbo": "minimax:h3@max-turbo",
+};
+
+async function handleAiImage(request, env) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Requisição inválida." }, { status: 400 });
+  }
+  if (String(body.secret || "") !== String(env.TEAM_SECRET || "")) {
+    return Response.json({ error: "Código da equipe incorreto." }, { status: 401 });
+  }
+  const apiKey = env.RUNWARE_API_KEY;
+  if (!apiKey) return Response.json({ error: "IA não configurada no relay." }, { status: 500 });
+
+  const prompt = String(body.prompt || "").trim();
+  if (!prompt) return Response.json({ error: "Prompt obrigatório." }, { status: 400 });
+  const style = String(body.style || "Cinematográfico");
+  const ratio = String(body.ratio || "16:9");
+  const engine = String(body.engine || "Nano Banana");
+  const referenceImages = Array.isArray(body.referenceImages)
+    ? body.referenceImages.filter((v) => typeof v === "string" && v).slice(0, 5)
+    : [];
+  const model = mapImageModel(engine);
+  const fullPrompt = `Generate a ${style} style image: ${prompt}. Aspect ratio ${ratio}. Professional production quality, cinematic lighting, ultra high resolution.`;
+  // Modelos Google (Nano Banana) só aceitam dimensões específicas.
+  let width = ratio === "9:16" || ratio === "3:4" ? 768 : 1024;
+  let height = ratio === "16:9" || ratio === "4:3" ? 768 : 1024;
+  if (model.startsWith("google:")) {
+    if (ratio === "16:9") { width = 1376; height = 768; }
+    else if (ratio === "9:16") { width = 768; height = 1376; }
+    else if (ratio === "4:3") { width = 1200; height = 896; }
+    else if (ratio === "3:4") { width = 896; height = 1200; }
+    else { width = 1024; height = 1024; }
+  }
+  const task = {
+    taskType: "imageInference",
+    taskUUID: crypto.randomUUID(),
+    model,
+    positivePrompt: fullPrompt,
+    width,
+    height,
+    outputFormat: "PNG",
+    numberResults: 1,
+  };
+  if (referenceImages.length) {
+    task.inputs = model === "meta:muse@image"
+      ? { referenceImages }
+      : referenceImages.map((image) => ({ image }));
+  }
+
+  const resp = await fetch("https://api.runware.ai/v1", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify([task]),
+  });
+  if (resp.status === 429) return Response.json({ error: "Limite de requisições excedido. Tente de novo em segundos." }, { status: 429 });
+  if (resp.status === 402) return Response.json({ error: "Créditos insuficientes na Runware." }, { status: 402 });
+  if (!resp.ok) {
+    const bodyText = await resp.text().catch(() => "");
+    console.error("Runware upstream:", resp.status, bodyText.slice(0, 300));
+    return Response.json({ error: "Erro no gateway de IA." }, { status: 502 });
+  }
+  const data = await resp.json();
+  const imageUrl = data.data && data.data[0] && data.data[0].imageURL;
+  if (!imageUrl) {
+    const msg = (data.errors && data.errors[0] && data.errors[0].message) || "Nenhuma imagem foi gerada.";
+    return Response.json({ error: msg }, { status: 500 });
+  }
+
+  // Guarda no R2 e devolve URL pública (a original expira).
+  try {
+    const img = await fetch(imageUrl);
+    if (img.ok) {
+      const buf = new Uint8Array(await img.arrayBuffer());
+      const key = `ai/${crypto.randomUUID()}.png`;
+      await env.MEDIA.put(key, buf, { httpMetadata: { contentType: "image/png" } });
+      return Response.json({ imageUrl: imgUrlOf(request, key), model });
+    }
+  } catch {
+    /* cai para a URL original */
+  }
+  return Response.json({ imageUrl, model });
+}
+
+async function handleAiVideo(request, env) {
+  let body;
+  try {
+    body = JSON.parse(await request.text());
+  } catch {
+    return Response.json({ error: "Requisição inválida." }, { status: 400 });
+  }
+  if (String(body.secret || "") !== String(env.TEAM_SECRET || "")) {
+    return Response.json({ error: "Código da equipe incorreto." }, { status: 401 });
+  }
+  const apiKey = env.RUNWARE_API_KEY;
+  if (!apiKey) return Response.json({ error: "IA não configurada no relay." }, { status: 500 });
+
+  const prompt = String(body.prompt || "").trim();
+  if (!prompt) return Response.json({ error: "Prompt obrigatório." }, { status: 400 });
+  const engine = String(body.engine || "MiniMax H3 Fast");
+  const task = {
+    taskType: "videoInference",
+    taskUUID: crypto.randomUUID(),
+    model: VIDEO_MODELS[engine] || "minimax:h3@fast",
+    positivePrompt: prompt,
+    duration: Math.min(Math.max(Number(body.duration || 5), 5), 15),
+    outputType: "URL",
+    outputFormat: "MP4",
+  };
+  if (body.referenceImage) {
+    task.inputs = { frameImages: [{ frame: "first", input: body.referenceImage }] };
+  }
+  const resp = await fetch("https://api.runware.ai/v1", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify([task]),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) {
+    const msg = (data.errors && data.errors[0] && data.errors[0].message) || "Erro no Runware.";
+    return Response.json({ error: msg }, { status: 502 });
+  }
+  const videoUrl = data.data && data.data[0] && data.data[0].videoURL;
+  if (!videoUrl) {
+    const msg = (data.errors && data.errors[0] && data.errors[0].message) || "Nenhum vídeo foi gerado.";
+    return Response.json({ error: msg }, { status: 500 });
+  }
+  return Response.json({ videoUrl, model: task.model });
+}
+
 // Mesma base de URL pública das imagens deste Worker.
 function imgUrlOf(requestUrl, key) {
   const url = new URL(typeof requestUrl === "string" ? requestUrl : requestUrl.url);
@@ -46,6 +193,24 @@ export class TeamRoom {
     this.ctx = ctx;
     this.env = env;
     this.sessions = new Map(); // ws -> { id, name }
+    this.teamSecretCache = null;
+    this.teamSecretAt = 0;
+  }
+
+  // Código da equipe fica no D1 (editável pelo admin); env é o valor inicial.
+  async getTeamSecret() {
+    if (!this.teamSecretCache || Date.now() - this.teamSecretAt > 60000) {
+      try {
+        const row = await this.env.DB.prepare(
+          "SELECT value FROM settings WHERE key = 'team_secret'"
+        ).first();
+        this.teamSecretCache = (row && row.value) || this.env.TEAM_SECRET || "";
+      } catch {
+        this.teamSecretCache = this.env.TEAM_SECRET || "";
+      }
+      this.teamSecretAt = Date.now();
+    }
+    return this.teamSecretCache;
   }
 
   async fetch(request) {
@@ -115,7 +280,8 @@ export class TeamRoom {
     if (msg.t === "ping") return this.send(ws, { t: "pong" });
 
     if (msg.t === "hello") {
-      if (String(msg.secret || "") !== String(this.env.TEAM_SECRET || "")) {
+      const teamSecret = await this.getTeamSecret();
+      if (String(msg.secret || "") !== String(teamSecret)) {
         this.send(ws, { t: "error", message: "Código da equipe incorreto." });
         try {
           ws.close();
@@ -148,6 +314,24 @@ export class TeamRoom {
 
     const user = this.sessions.get(ws);
     if (!user) return this.send(ws, { t: "error", message: "Não autenticado." });
+
+    if (msg.t === "admin-rotate-secret") {
+      if (String(msg.adminSecret || "") !== String(this.env.ADMIN_SECRET || "")) {
+        return this.send(ws, { t: "error", message: "Sem permissão." });
+      }
+      const next = String(msg.newSecret || "").trim();
+      if (next.length < 4 || next.length > 64) {
+        return this.send(ws, { t: "error", message: "Código deve ter 4 a 64 caracteres." });
+      }
+      await this.env.DB.prepare(
+        "INSERT INTO settings (key, value) VALUES ('team_secret', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+      )
+        .bind(next)
+        .run();
+      this.teamSecretCache = next;
+      this.teamSecretAt = Date.now();
+      return this.send(ws, { t: "secret-rotated" });
+    }
 
     if (msg.t === "chat-post" && msg.msg) {
       const m = msg.msg;
@@ -215,11 +399,49 @@ export class TeamRoom {
   }
 }
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+function jsonCors(obj, status) {
+  return Response.json(obj, {
+    status: status || 200,
+    headers: CORS_HEADERS,
+  });
+}
+
+async function withCors(response) {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(CORS_HEADERS)) {
+    headers.set(key, value);
+  }
+  return new Response(response.body, { status: response.status, headers });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: CORS_HEADERS });
+    }
     if (url.pathname === "/") {
       return Response.json({ ok: true, service: "unicfilm-relay" });
+    }
+    if (url.pathname === "/ai-image" && request.method === "POST") {
+      try {
+        return await withCors(await handleAiImage(request, env));
+      } catch (e) {
+        return jsonCors({ error: "Falha na geração. Tente de novo." }, 500);
+      }
+    }
+    if (url.pathname === "/ai-video" && request.method === "POST") {
+      try {
+        return await withCors(await handleAiVideo(request, env));
+      } catch (e) {
+        return jsonCors({ error: "Falha na geração. Tente de novo." }, 500);
+      }
     }
     if (url.pathname.startsWith("/img/")) {
       const key = decodeURIComponent(url.pathname.slice(5));

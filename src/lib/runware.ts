@@ -39,13 +39,23 @@ export async function generateImageDirect(args: {
   const model = mapImageModel(engine);
   const fullPrompt = `Generate a ${style} style image: ${prompt}. Aspect ratio ${ratio}. Professional production quality, cinematic lighting, ultra high resolution.`;
 
+  // Modelos Google (Nano Banana) só aceitam dimensões específicas.
+  let width = ratio === "9:16" || ratio === "3:4" ? 768 : 1024;
+  let height = ratio === "16:9" || ratio === "4:3" ? 768 : 1024;
+  if (model.startsWith("google:")) {
+    if (ratio === "16:9") { width = 1376; height = 768; }
+    else if (ratio === "9:16") { width = 768; height = 1376; }
+    else if (ratio === "4:3") { width = 1200; height = 896; }
+    else if (ratio === "3:4") { width = 896; height = 1200; }
+    else { width = 1024; height = 1024; }
+  }
   const task: Record<string, unknown> = {
     taskType: "imageInference",
     taskUUID: crypto.randomUUID(),
     model,
     positivePrompt: fullPrompt,
-    width: ratio === "9:16" || ratio === "3:4" ? 768 : 1024,
-    height: ratio === "16:9" || ratio === "4:3" ? 768 : 1024,
+    width,
+    height,
     outputFormat: "PNG",
     numberResults: 1,
   };

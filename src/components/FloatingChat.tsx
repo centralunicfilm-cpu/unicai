@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
 import { resolveChat, sendChatMessage, subscribeChat, type ResolvedChatMessage } from "@/lib/localChat";
-import { forwardChatToHost, lanState, subscribeLan } from "@/lib/lanSync";
-import { forwardChatToCloud } from "@/lib/cloudSync";
+import { forwardChatToHost, lanConnect, lanConnected, lanState, savedLanHost, savedLanPin, subscribeLan } from "@/lib/lanSync";
+import { cloudConnect, cloudConnected, cloudState, DEFAULT_CLOUD_HOST, forwardChatToCloud, savedCloudHost, savedCloudSecret, subscribeCloud } from "@/lib/cloudSync";
 import { fileToDataUrl } from "@/lib/runware";
 
 interface Message {
@@ -118,6 +118,9 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: "image" | "video"; prompt: string } | null>(null);
     const [lanInfo, setLanInfo] = useState(() => lanState());
+    const [cloudInfo, setCloudInfo] = useState(() => cloudState());
+    const [teamCode, setTeamCode] = useState("");
+    const [joining, setJoining] = useState(false);
     const knownIdsRef = useRef<Set<string>>(new Set());
     const { user, profile } = useAuth();
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -213,6 +216,31 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
         };
 
         void initial();
+        setCloudInfo(cloudState());
+        const offCloud = subscribeCloud(() => setCloudInfo(cloudState()));
+
+        // Reconexão automática (uma vez por Mac): usa IP/PIN e URL/código salvos.
+        if (!lanConnected()) {
+          const ip = savedLanHost();
+          const pin = savedLanPin();
+          if (ip && pin) {
+            void lanConnect(ip, pin, {
+              id: user.id,
+              name: profile?.full_name || user.email || "Usuário",
+            });
+          }
+        }
+        if (!cloudConnected()) {
+          const host = savedCloudHost();
+          const secret = savedCloudSecret();
+          if (host && secret) {
+            void cloudConnect(host, secret, {
+              id: user.id,
+              name: profile?.full_name || user.email || "Usuário",
+            });
+          }
+        }
+
         setOnlineUsers(
             lanState().clients.map((client) => ({ user_id: client.id, full_name: client.name })),
         );
@@ -229,6 +257,7 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
             isMounted = false;
             offChat();
             offLan();
+            offCloud();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.id]);
@@ -236,6 +265,23 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
     useEffect(() => {
         if (isOpen && !isMinimized) scrollToBottom();
     }, [isOpen, isMinimized, sortedMessages]);
+
+    const joinTeam = async (e?: FormEvent) => {
+        if (e) e.preventDefault();
+        if (!user || joining || !teamCode.trim()) return;
+        setJoining(true);
+        const error = await cloudConnect(savedCloudHost() || DEFAULT_CLOUD_HOST, teamCode.trim(), {
+            id: user.id,
+            name: profile?.full_name || user.email?.split("@")[0] || "Usuário",
+        });
+        setJoining(false);
+        setCloudInfo(cloudState());
+        if (error) toast.error(error);
+        else {
+            setTeamCode("");
+            toast.success("Chat da equipe ativado!");
+        }
+    };
 
     const persistMessage = async (content: string, mediaUrl?: string, mediaType?: "image" | "video") => {
         if (!user) throw new Error("Usuário não autenticado");
@@ -357,6 +403,32 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
 
                     {!isMinimized && (
                         <>
+                            {cloudInfo.state !== "on" && (
+                                <div className="px-5 pt-4">
+                                    {cloudInfo.state === "connecting" || joining ? (
+                                        <p className="text-center text-[10px] font-bold uppercase tracking-widest text-orange animate-pulse">
+                                            Conectando ao chat da equipe...
+                                        </p>
+                                    ) : (
+                                        <form onSubmit={joinTeam} className="flex gap-2">
+                                            <input
+                                                value={teamCode}
+                                                onChange={(event) => setTeamCode(event.target.value)}
+                                                placeholder="Código da equipe (1ª vez)"
+                                                autoComplete="off"
+                                                className="flex-1 min-w-0 bg-black/40 border border-orange/30 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-white/25 focus:outline-none focus:border-orange transition-all"
+                                            />
+                                            <button
+                                                type="submit"
+                                                disabled={joining || !teamCode.trim()}
+                                                className="px-4 py-2.5 rounded-xl bg-orange text-white text-[10px] font-bold tracking-widest uppercase hover:brightness-110 transition-all disabled:opacity-40 shrink-0"
+                                            >
+                                                Entrar
+                                            </button>
+                                        </form>
+                                    )}
+                                </div>
+                            )}
                             <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto scrollbar-hide space-y-4">
                                 {loadingMessages && (
                                     <div className="flex justify-center py-8">

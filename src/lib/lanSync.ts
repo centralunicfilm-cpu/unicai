@@ -81,6 +81,25 @@ export function lanConnected(): boolean {
   return connState === "on" && !!ws && ws.readyState === WebSocket.OPEN;
 }
 
+const LAN_PIN_KEY = "unicfilm.local.lan.pin";
+const LAST_HOST_KEY = "unicfilm.local.lan.host";
+
+export function savedLanPin(): string {
+  try {
+    return localStorage.getItem(LAN_PIN_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+export function savedLanHost(): string {
+  try {
+    return localStorage.getItem(LAST_HOST_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
 function setState(next: LanConnState) {
   connState = next;
   emitLan();
@@ -247,6 +266,14 @@ export async function lanConnect(
   identity = { id: user.id, name: user.name };
   wantConnection = true;
   if (!hostIp) return "Informe o IP do Mac anfitrião.";
+  if (pin.trim()) {
+    try {
+      localStorage.setItem(LAN_PIN_KEY, pin.trim());
+      localStorage.setItem(LAST_HOST_KEY, hostIp);
+    } catch {
+      /* ignora */
+    }
+  }
   return openSocket();
 }
 

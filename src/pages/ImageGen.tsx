@@ -11,7 +11,9 @@ import ToolPageLayout from "@/components/ToolPageLayout";
 import ImageDropZone from "@/components/ImageDropZone";
 import EngineSwitchNotice from "@/components/EngineSwitchNotice";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
-import { generateImageDirect, fileToDataUrl, loadLocalHistory, saveLocalHistoryItem } from "@/lib/runware";
+import { generateImageDirect, getRunwareKey, fileToDataUrl, loadLocalHistory, saveLocalHistoryItem } from "@/lib/runware";
+import { cloudAIReady, generateImageViaCloud } from "@/lib/cloudAI";
+import TeamCodeGate from "@/components/TeamCodeGate";
 import { fetchAndCache, loadBlobUrl } from "@/lib/mediaCache";
 import { IMAGE_PREFILL_KEY } from "@/pages/Prompts";
 
@@ -162,14 +164,17 @@ export default function ImageGen() {
       );
       const validReferenceImages = referenceImageUrls.filter((url): url is string => Boolean(url));
 
-      // Chamada direta à Runware (mesma key da Edge Function, via VITE_RUNWARE_API_KEY)
-      const { imageUrl } = await generateImageDirect({
+      // Com key local: chamada direta à Runware. Sem key: via nuvem (código da equipe).
+      const payload = {
         prompt,
         style,
         ratio,
         engine,
         referenceImages: validReferenceImages,
-      });
+      };
+      const { imageUrl } = getRunwareKey()
+        ? await generateImageDirect(payload)
+        : await generateImageViaCloud(payload);
 
       // Baixa e guarda o arquivo neste Mac (a URL da Runware é temporária).
       // Preview e galeria passam a usar o arquivo local.
@@ -202,8 +207,21 @@ export default function ImageGen() {
       toast.success("Imagem gerada com sucesso!");
     } catch (e: any) {
       const msg = e.message || "Erro desconhecido";
-      setError(msg);
-      toast.error(msg);
+      if (msg === "NO_CODE") {
+        setError("Digite o código da equipe acima para gerar online.");
+        toast.info("Digite o código da equipe para gerar online.");
+      } else if (msg === "WRONG_CODE") {
+        try {
+          localStorage.removeItem("unicfilm.local.cloud.secret");
+        } catch {
+          /* ignora */
+        }
+        setError("Código incorreto. Digite novamente acima.");
+        toast.error("Código da equipe incorreto.");
+      } else {
+        setError(msg);
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -350,6 +368,8 @@ export default function ImageGen() {
                 ))}
               </div>
             </div>
+
+            {!getRunwareKey() && !cloudAIReady() && <TeamCodeGate />}
 
             <button onClick={handleGenerate} disabled={loading || !prompt.trim()}
               className="w-full py-5 rounded-2xl font-display text-xl tracking-[0.2em] text-[hsl(var(--primary-foreground))] bg-orange btn-glow flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:scale-[1.01] active:scale-[0.99]">

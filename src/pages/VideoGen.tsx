@@ -7,7 +7,9 @@ import FullscreenViewer from "@/components/FullscreenViewer";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
-import { generateVideoDirect, loadLocalHistory, saveLocalHistoryItem } from "@/lib/runware";
+import { generateVideoDirect, getRunwareKey, loadLocalHistory, saveLocalHistoryItem } from "@/lib/runware";
+import { cloudAIReady, generateVideoViaCloud } from "@/lib/cloudAI";
+import TeamCodeGate from "@/components/TeamCodeGate";
 import { publishToGallery } from "@/lib/localGallery";
 import { sendChatMessage } from "@/lib/localChat";
 import { forwardChatToHost, forwardGalleryToHost } from "@/lib/lanSync";
@@ -108,10 +110,13 @@ export default function VideoGen() {
     setResult(null);
 
     try {
-      // Chamada direta à Runware (mesma key da Edge Function, via VITE_RUNWARE_API_KEY)
-      const { videoUrl } = await generateVideoDirect({
+      // Com key local: chamada direta à Runware. Sem key: via nuvem (código da equipe).
+      const payload = {
         prompt, engine, duration, referenceImage,
-      });
+      };
+      const { videoUrl } = getRunwareKey()
+        ? await generateVideoDirect(payload)
+        : await generateVideoViaCloud(payload);
       void ratio;
       setResult(videoUrl);
       setLastPrompt(prompt);
@@ -131,8 +136,22 @@ export default function VideoGen() {
         }, ...current].slice(0, 20));
       }
     } catch (e: any) {
-      setError(e.message || "Erro ao gerar vídeo");
-      toast.error(e.message || "Erro ao gerar vídeo");
+      const msg = e.message || "Erro ao gerar vídeo";
+      if (msg === "NO_CODE") {
+        setError("Digite o código da equipe acima para gerar online.");
+        toast.info("Digite o código da equipe para gerar online.");
+      } else if (msg === "WRONG_CODE") {
+        try {
+          localStorage.removeItem("unicfilm.local.cloud.secret");
+        } catch {
+          /* ignora */
+        }
+        setError("Código incorreto. Digite novamente acima.");
+        toast.error("Código da equipe incorreto.");
+      } else {
+        setError(msg);
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -307,6 +326,8 @@ export default function VideoGen() {
                 </div>
               </div>
             </div>
+
+            {!getRunwareKey() && !cloudAIReady() && <TeamCodeGate />}
 
             <button onClick={handleGenerate} disabled={loading || !prompt.trim()}
               className="w-full py-5 rounded-2xl font-display text-xl tracking-[0.2em] text-[hsl(var(--primary-foreground))] bg-orange btn-glow flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:scale-[1.01] active:scale-[0.99]">

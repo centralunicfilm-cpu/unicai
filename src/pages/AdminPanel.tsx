@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { cloudAdminRotate, cloudConnected } from "@/lib/cloudSync";
 
 interface LocalRow {
     id: string;
@@ -28,6 +29,25 @@ export default function AdminPanel() {
     const { listUsers, setUserStatus, deleteUser } = useAuth();
     const [users, setUsers] = useState<LocalRow[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [adminSecret, setAdminSecret] = useState("");
+    const [newTeamCode, setNewTeamCode] = useState("");
+    const [rotating, setRotating] = useState(false);
+
+    const handleRotateCode = async () => {
+        if (newTeamCode.trim().length < 4) {
+            toast.error("O novo código precisa de ao menos 4 caracteres.");
+            return;
+        }
+        setRotating(true);
+        const error = await cloudAdminRotate(adminSecret, newTeamCode.trim());
+        setRotating(false);
+        if (error) toast.error(error);
+        else {
+            toast.success("Código da equipe trocado! Avise o novo código à equipe.");
+            setNewTeamCode("");
+            setAdminSecret("");
+        }
+    };
 
     const fetchUsers = () => {
         try {
@@ -88,6 +108,51 @@ export default function AdminPanel() {
                         <p className="text-xl font-bold text-orange italic">
                             {users.filter(u => u.role === 'admin_master').length}
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* CÓDIGO DA EQUIPE ONLINE */}
+            <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 md:p-8 space-y-4">
+                <div>
+                    <h2 className="text-sm font-bold text-white tracking-widest uppercase italic">Código da equipe (chat online)</h2>
+                    <p className="text-white/40 text-xs mt-1">
+                        Quem tiver o código entra no chat/galeria online. Trocar o código desconecta quem está usando o antigo — avise a equipe.
+                        {cloudConnected() ? " Status: conectado ao relay." : " Status: desconectado — conecte-se primeiro (chat ou tela Rede)."}
+                    </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <label className="block text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2">Senha de admin online</label>
+                        <input
+                            type="password"
+                            value={adminSecret}
+                            onChange={(e) => setAdminSecret(e.target.value)}
+                            placeholder="••••••••"
+                            autoComplete="off"
+                            className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-orange/50 transition-colors"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2">Novo código da equipe</label>
+                        <input
+                            type="text"
+                            value={newTeamCode}
+                            onChange={(e) => setNewTeamCode(e.target.value)}
+                            placeholder="Ex: equipe-2026"
+                            autoComplete="off"
+                            minLength={4}
+                            className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-orange/50 transition-colors"
+                        />
+                    </div>
+                    <div className="flex items-end">
+                        <Button
+                            onClick={handleRotateCode}
+                            disabled={rotating}
+                            className="w-full h-[46px] rounded-xl bg-orange hover:brightness-110 text-white text-[10px] font-bold uppercase tracking-widest disabled:opacity-40"
+                        >
+                            {rotating ? "Trocando..." : "Trocar código"}
+                        </Button>
                     </div>
                 </div>
             </div>

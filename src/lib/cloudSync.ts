@@ -9,6 +9,9 @@ import { loadBlobDataUrl } from "./mediaCache";
 const CLOUD_HOST_KEY = "unicfilm.local.cloud.host";
 const CLOUD_SECRET_KEY = "unicfilm.local.cloud.secret";
 
+// URL pública do relay (não é segredo) — o código da equipe é o que protege.
+export const DEFAULT_CLOUD_HOST = "unicfilm-relay.central-unicfilm.workers.dev";
+
 type CloudState = "off" | "connecting" | "on";
 
 let ws: WebSocket | null = null;
@@ -42,7 +45,19 @@ export function cloudConnected(): boolean {
 }
 
 export function savedCloudHost(): string {
-  return localStorage.getItem(CLOUD_HOST_KEY) || "";
+  try {
+    return localStorage.getItem(CLOUD_HOST_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+export function savedCloudSecret(): string {
+  try {
+    return localStorage.getItem(CLOUD_SECRET_KEY) || "";
+  } catch {
+    return "";
+  }
 }
 
 function setState(next: CloudState) {
@@ -210,12 +225,16 @@ export async function cloudConnect(
   user: { id: string; name: string }
 ): Promise<string | null> {
   cloudDisconnect(false);
-  workerHost = normalizeHost(host);
+  workerHost = normalizeHost(host) || DEFAULT_CLOUD_HOST;
   identity = { id: user.id, name: user.name };
   wantConnection = true;
-  if (!workerHost) return "Informe a URL do Worker.";
   if (!secret.trim()) return "Informe o código da equipe.";
-  localStorage.setItem(CLOUD_HOST_KEY, workerHost);
+  try {
+    localStorage.setItem(CLOUD_HOST_KEY, workerHost);
+    localStorage.setItem(CLOUD_SECRET_KEY, secret.trim());
+  } catch {
+    /* ignora */
+  }
   return openSocket(secret.trim());
 }
 
@@ -235,6 +254,43 @@ export function cloudDisconnect(emit = true) {
   }
   cloudClients = [];
   if (emit) setState("off");
+}
+
+// Troca o código da equipe no relay (só admin, precisa estar conectado).
+export function cloudAdminRotate(adminSecret: string, newSecret: string): Promise<string | null> {
+  if (!cloudConnected() || !ws) return Promise.resolve("Conecte-se ao relay primeiro.");
+  return new Promise((resolve) => {
+    const timer = window.setTimeout(() => {
+      window.removeEventListener("message", () => {});
+      resolve("Sem resposta do relay.");
+    }, 12000);
+    const onMsg = (event: MessageEvent) => {
+      let msg: any;
+      try {
+        msg = JSON.parse(String((event as MessageEvent).data));
+      } catch {
+        return;
+      }
+      if (msg.t === "secret-rotated") {
+        window.clearTimeout(timer);
+        ws?.removeEventListener("message", onMsg as EventListener);
+        resolve(null);
+      } else if (msg.t === "error") {
+        window.clearTimeout(timer);
+        ws?.removeEventListener("message", onMsg as EventListener);
+        resolve(String(msg.message || "Erro."));
+      }
+    };
+    // Ouve direto no socket (resposta vem fora do fluxo do app).
+    try {
+      (ws as unknown as { addEventListener: (t: string, f: (e: Event) => void) => void }).addEventListener("message", onMsg as (e: Event) => void);
+    } catch {
+      window.clearTimeout(timer);
+      resolve("Conexão indisponível.");
+      return;
+    }
+    ws?.send(JSON.stringify({ t: "admin-rotate-secret", adminSecret, newSecret }));
+  });
 }
 
 // Envia mensagem já salva localmente para o relay espalhar (imagem ≤8MB; vídeo só metadados).
