@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld("unicfilmLan", {
   hostStop: () => ipcRenderer.invoke("lan-host-stop"),
   hostStatus: () => ipcRenderer.invoke("lan-host-status"),
   hostRegenPin: () => ipcRenderer.invoke("lan-host-regen-pin"),
+  discover: () => ipcRenderer.invoke("lan-discover"),
 });

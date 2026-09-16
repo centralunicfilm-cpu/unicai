@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Wifi, Server, MonitorSmartphone, Loader2, Copy, Check, RefreshCw, Power, Unplug } from "lucide-react";
+import { Wifi, Server, MonitorSmartphone, Loader2, Copy, Check, RefreshCw, Power, Unplug, Search } from "lucide-react";
 import ToolPageLayout from "@/components/ToolPageLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -7,9 +7,11 @@ import {
   lanBridgeAvailable,
   lanConnect,
   lanDisconnect,
+  lanDiscover,
   lanState,
   subscribeLan,
   LAN_PORT,
+  type DiscoveredHost,
   type LanHostInfo,
 } from "@/lib/lanSync";
 
@@ -25,6 +27,8 @@ export default function Network() {
   const [hostIp, setHostIp] = useState(() => localStorage.getItem(LAST_HOST_KEY) || "");
   const [pin, setPin] = useState("");
   const [copied, setCopied] = useState(false);
+  const [found, setFound] = useState<DiscoveredHost[]>([]);
+  const [scanning, setScanning] = useState(false);
 
   const refreshHost = async () => {
     if (!window.unicfilmLan) return;
@@ -113,6 +117,23 @@ export default function Network() {
     lanDisconnect();
     setConn(lanState());
     toast.success("Desconectado.");
+  };
+
+  const handleScan = async () => {
+    setScanning(true);
+    try {
+      const hosts = await lanDiscover();
+      setFound(hosts);
+      if (hosts.length === 0) {
+        toast.info(
+          bridge
+            ? "Nenhum anfitrião encontrado. Confira se estão no mesmo Wi-Fi."
+            : "Busca automática só no app instalado — no navegador digite o IP."
+        );
+      }
+    } finally {
+      setScanning(false);
+    }
   };
 
   return (
@@ -225,6 +246,39 @@ export default function Network() {
             </div>
           ) : (
             <form onSubmit={handleConnect} className="space-y-4">
+              <button
+                type="button"
+                onClick={handleScan}
+                disabled={scanning}
+                className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white hover:border-orange/40 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+              >
+                {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                {scanning ? "PROCURANDO..." : "BUSCAR MACS NA REDE"}
+              </button>
+
+              {found.length > 0 && (
+                <div className="grid grid-cols-1 gap-2">
+                  {found.map((h) => (
+                    <button
+                      key={`${h.ip}:${h.port}`}
+                      type="button"
+                      onClick={() => {
+                        setHostIp(h.ip);
+                        toast.success(`${h.name} selecionado — digite o PIN.`);
+                      }}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${hostIp === h.ip ? "bg-orange/10 border-orange/40" : "bg-white/5 border-white/10 hover:border-orange/30"}`}
+                    >
+                      <MonitorSmartphone className="w-4 h-4 text-orange shrink-0" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-xs font-bold text-white truncate">{h.name}</span>
+                        <span className="block text-[10px] text-white/40">{h.ip}</span>
+                      </span>
+                      {hostIp === h.ip && <Check className="w-4 h-4 text-orange shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] font-bold tracking-widest uppercase text-[hsl(var(--text-dim))] mb-2">IP do anfitrião</label>

@@ -18,11 +18,29 @@ export interface LanHostInfo {
   galleryCount: number;
 }
 
+export interface DiscoveredHost {
+  name: string;
+  ip: string;
+  port: number;
+}
+
 interface LanBridge {
   hostStart: () => Promise<LanHostInfo>;
   hostStop: () => Promise<LanHostInfo>;
   hostStatus: () => Promise<LanHostInfo>;
   hostRegenPin: () => Promise<LanHostInfo>;
+  discover: () => Promise<DiscoveredHost[]>;
+}
+
+// Descoberta automática (só no app instalado; no navegador retorna []).
+export async function lanDiscover(): Promise<DiscoveredHost[]> {
+  if (!lanBridgeAvailable() || !window.unicfilmLan) return [];
+  try {
+    const found = await window.unicfilmLan.discover();
+    return Array.isArray(found) ? found : [];
+  } catch {
+    return [];
+  }
 }
 
 declare global {

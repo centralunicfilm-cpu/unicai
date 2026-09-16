@@ -1,6 +1,6 @@
 const { app, BrowserWindow, shell, ipcMain } = require("electron");
 const path = require("path");
-const { startLanHost, stopLanHost, getLanStatus, regenLanPin } = require("./lan-host.cjs");
+const { startLanHost, stopLanHost, getLanStatus, regenLanPin, discoverLanHosts } = require("./lan-host.cjs");
 
 function createWindow() {
   const window = new BrowserWindow({
@@ -30,6 +30,7 @@ ipcMain.handle("lan-host-start", () => startLanHost(app.getPath("userData")));
 ipcMain.handle("lan-host-stop", () => stopLanHost());
 ipcMain.handle("lan-host-status", () => getLanStatus());
 ipcMain.handle("lan-host-regen-pin", () => regenLanPin());
+ipcMain.handle("lan-discover", () => discoverLanHosts(4000));
 
 app.whenReady().then(() => {
   createWindow();

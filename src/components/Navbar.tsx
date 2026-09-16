@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import logo from "@/assets/unicfilm-logo.png";
 import {
     Video,
     Image as ImageIcon,
@@ -68,6 +69,9 @@ export default function Navbar() {
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B0B0D]/80 backdrop-blur-md border-b border-white/5 h-16 flex items-center px-6">
             <div className="w-full relative flex items-center h-full">
+                <Link to="/" className="absolute left-0 flex items-center gap-3 group" aria-label="Voltar ao início" title="Início">
+                    <img src={logo} alt="Unicfilm" className="h-9 object-contain transition-transform group-hover:scale-105" />
+                </Link>
                 <div className="flex-1 flex justify-center">
                     <div className="hidden lg:flex items-center">
                         <NavigationMenu>

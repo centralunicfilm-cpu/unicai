@@ -1,9 +1,76 @@
 // Servidor de rede local (Mac anfitrião) — chat + galeria entre Macs sem internet.
 // WebSocket em LAN (padrão porta 41234), auth por PIN, persistência em userData/unicfilm-lan.
+// Anuncia via mDNS (tipo "unicfilm") para descoberta automática sem digitar IP.
 const { WebSocketServer } = require("ws");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+
+let bonjourInstance = null;
+let publishedService = null;
+
+function publishPresence(port) {
+  try {
+    if (!bonjourInstance) {
+      const Bonjour = require("bonjour-service");
+      bonjourInstance = new Bonjour();
+    }
+    unpublishPresence();
+    publishedService = bonjourInstance.publish({
+      name: `Unicfilm ${os.hostname()}`,
+      type: "unicfilm",
+      port,
+    });
+  } catch (err) {
+    console.warn("mDNS indisponível:", err && err.message);
+  }
+}
+
+function unpublishPresence() {
+  try {
+    if (publishedService && typeof publishedService.stop === "function") publishedService.stop();
+  } catch {
+    /* ignora */
+  }
+  publishedService = null;
+}
+
+function discoverHosts(timeoutMs) {
+  return new Promise((resolve) => {
+    const found = new Map();
+    let browser = null;
+    let bonjour = null;
+    const finish = () => {
+      try {
+        if (browser && typeof browser.stop === "function") browser.stop();
+      } catch {
+        /* ignora */
+      }
+      try {
+        if (bonjour && typeof bonjour.destroy === "function") bonjour.destroy();
+      } catch {
+        /* ignora */
+      }
+      resolve([...found.values()]);
+    };
+    try {
+      const Bonjour = require("bonjour-service");
+      bonjour = new Bonjour();
+      browser = bonjour.find({ type: "unicfilm" }, (service) => {
+        const name = service.name || "Mac";
+        const port = service.port || PORT;
+        const addresses = (service.addresses || []).filter(
+          (a) => a && !a.includes(":") && !a.startsWith("127.")
+        );
+        const ip = addresses[0] || service.host || null;
+        if (ip) found.set(`${ip}:${port}`, { name, ip, port });
+      });
+      setTimeout(finish, timeoutMs || 4000);
+    } catch {
+      resolve([]);
+    }
+  });
+}
 
 const PORT = 41234;
 const IMAGE_BYTES_MAX = 15 * 1024 * 1024; // imagens acima disso sincronizam só metadados
@@ -262,10 +329,12 @@ function startLanHost(baseDir) {
   state.running = true;
   state.ip = getLanIp();
   state.clients = [];
+  publishPresence(PORT);
   return getStatus();
 }
 
 function stopLanHost() {
+  unpublishPresence();
   if (wss) {
     for (const client of wss.clients) {
       try {
@@ -293,4 +362,4 @@ function regenPin() {
   return getStatus();
 }
 
-module.exports = { startLanHost, stopLanHost, getLanStatus: getStatus, regenLanPin: regenPin, LAN_PORT: PORT };
+module.exports = { startLanHost, stopLanHost, getLanStatus: getStatus, regenLanPin: regenPin, discoverLanHosts: discoverHosts, LAN_PORT: PORT };
