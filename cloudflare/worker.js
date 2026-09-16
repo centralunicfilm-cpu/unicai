@@ -228,6 +228,19 @@ export default {
       if (!obj) return new Response("404", { status: 404 });
       const headers = new Headers();
       obj.writeHttpMetadata(headers);
+      if (!headers.get("content-type")) {
+        const lower = key.toLowerCase();
+        const guess = lower.endsWith(".png")
+          ? "image/png"
+          : lower.endsWith(".webp")
+            ? "image/webp"
+            : lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+              ? "image/jpeg"
+              : lower.endsWith(".gif")
+                ? "image/gif"
+                : "application/octet-stream";
+        headers.set("content-type", guess);
+      }
       headers.set("Cache-Control", "public, max-age=31536000, immutable");
       headers.set("Access-Control-Allow-Origin", "*");
       return new Response(obj.body, { headers });
