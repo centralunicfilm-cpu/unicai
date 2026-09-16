@@ -3,35 +3,39 @@ import { Image as ImageIcon, Search, Maximize2, Download, Pencil } from "lucide-
 import ToolPageLayout from "@/components/ToolPageLayout";
 import FullscreenViewer from "@/components/FullscreenViewer";
 import MediaMetaEditor from "@/components/MediaMetaEditor";
-import { INSPIRATION_ITEMS, INSPIRATION_FOLDERS } from "@/data/inspiration";
+import { INSPIRATION_ITEMS } from "@/data/inspiration";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
 import { displayTitle, getMeta, matchesMeta, subscribeMeta } from "@/lib/mediaMeta";
 
-const FOLDER_LABELS: Record<string, string> = {
-  "palco": "Palco",
-  "lista-10-junho": "Lista 10 Junho",
-  "lista-2-junho": "Lista 2 Junho",
-  "palcos-novos": "Palcos Novos",
-};
-
 export default function Inspiration() {
   const [query, setQuery] = useState("");
-  const [folder, setFolder] = useState<string>("all");
+  const [activeTag, setActiveTag] = useState<string>("all");
   const [fsIndex, setFsIndex] = useState<number | null>(null);
   const [editingUrl, setEditingUrl] = useState<string | null>(null);
   const [metaTick, setMetaTick] = useState(0);
 
   useEffect(() => subscribeMeta(() => setMetaTick((t) => t + 1)), []);
 
-  const filtered = useMemo(() => {
+  // Tags em uso (a ordem nova é pelas tags que você marcar).
+  const usedTags = useMemo(() => {
     void metaTick;
+    const counts = new Map<string, number>();
+    for (const item of INSPIRATION_ITEMS) {
+      for (const t of getMeta(`insp:${item.url}`).tags) {
+        counts.set(t, (counts.get(t) || 0) + 1);
+      }
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }, [metaTick]);
+
+  const filtered = useMemo(() => {
     return INSPIRATION_ITEMS.filter((item) => {
-      if (folder !== "all" && item.folder !== folder) return false;
-      // Busca por título, #tags e pasta.
       const meta = getMeta(`insp:${item.url}`);
+      if (activeTag !== "all" && !meta.tags.includes(activeTag)) return false;
+      // Busca por título, #tags e pasta.
       return matchesMeta(query, meta, [item.title, item.folder]);
     });
-  }, [query, folder, metaTick]);
+  }, [query, activeTag, metaTick]);
 
   return (
     <ToolPageLayout
@@ -53,18 +57,18 @@ export default function Inspiration() {
 
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => setFolder("all")}
-            className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase transition-all ${folder === "all" ? "bg-orange text-white shadow-lg shadow-orange/20" : "bg-[hsl(var(--surface))] text-[hsl(var(--text-secondary))] border border-white/5 hover:border-orange/30"}`}
+            onClick={() => setActiveTag("all")}
+            className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase transition-all ${activeTag === "all" ? "bg-orange text-white shadow-lg shadow-orange/20" : "bg-[hsl(var(--surface))] text-[hsl(var(--text-secondary))] border border-white/5 hover:border-orange/30"}`}
           >
             Todas ({INSPIRATION_ITEMS.length})
           </button>
-          {INSPIRATION_FOLDERS.map((f) => (
+          {usedTags.map(([tag, count]) => (
             <button
-              key={f}
-              onClick={() => setFolder(f)}
-              className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase transition-all ${folder === f ? "bg-orange text-white shadow-lg shadow-orange/20" : "bg-[hsl(var(--surface))] text-[hsl(var(--text-secondary))] border border-white/5 hover:border-orange/30"}`}
+              key={tag}
+              onClick={() => setActiveTag(activeTag === tag ? "all" : tag)}
+              className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase transition-all ${activeTag === tag ? "bg-orange text-white shadow-lg shadow-orange/20" : "bg-[hsl(var(--surface))] text-[hsl(var(--text-secondary))] border border-white/5 hover:border-orange/30"}`}
             >
-              {FOLDER_LABELS[f] || f} ({INSPIRATION_ITEMS.filter((i) => i.folder === f).length})
+              #{tag} ({count})
             </button>
           ))}
         </div>
