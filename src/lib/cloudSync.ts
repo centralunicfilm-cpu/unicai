@@ -17,6 +17,7 @@ type CloudState = "off" | "connecting" | "on";
 
 let ws: WebSocket | null = null;
 let connState: CloudState = "off";
+let cloudAuthed = false;
 let workerHost = "";
 let wantConnection = false;
 let reconnectTimer: number | null = null;
@@ -36,9 +37,10 @@ export function subscribeCloud(callback: () => void): () => void {
 export function cloudState(): {
   state: CloudState;
   host: string;
+  authed: boolean;
   clients: Array<{ id: string; name: string }>;
 } {
-  return { state: connState, host: workerHost, clients: cloudClients };
+  return { state: connState, host: workerHost, authed: cloudAuthed, clients: cloudClients };
 }
 
 export function cloudConnected(): boolean {
@@ -118,6 +120,7 @@ async function openSocket(secret: string): Promise<string | null> {
         }
         if (msg.t === "welcome") {
           window.clearTimeout(timeout);
+          cloudAuthed = msg.authed !== false;
           for (const m of (msg.chat || []) as any[]) {
             await mergeChatMessage(
               {
@@ -224,6 +227,7 @@ async function openSocket(secret: string): Promise<string | null> {
         window.clearTimeout(timeout);
         if (ws === socket) ws = null;
         cloudClients = [];
+        cloudAuthed = false;
         if (wantConnection) {
           setState("off");
           scheduleReconnect(secret);
@@ -246,10 +250,10 @@ export async function cloudConnect(
   workerHost = normalizeHost(host) || DEFAULT_CLOUD_HOST;
   identity = { id: user.id, name: user.name };
   wantConnection = true;
-  if (!secret.trim()) return "Informe o código da equipe.";
+  // Segredo vazio = convidado (só conversa). Com código = acesso total.
   try {
     localStorage.setItem(CLOUD_HOST_KEY, workerHost);
-    localStorage.setItem(CLOUD_SECRET_KEY, secret.trim());
+    if (secret.trim()) localStorage.setItem(CLOUD_SECRET_KEY, secret.trim());
   } catch {
     /* ignora */
   }

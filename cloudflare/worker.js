@@ -281,16 +281,13 @@ export class TeamRoom {
 
     if (msg.t === "hello") {
       const teamSecret = await this.getTeamSecret();
-      if (String(msg.secret || "") !== String(teamSecret)) {
-        this.send(ws, { t: "error", message: "Código da equipe incorreto." });
-        try {
-          ws.close();
-        } catch {}
-        return;
-      }
+      // Chat é aberto: sem código entra como convidado (só conversa).
+      // Galeria, IA e admin exigem o código.
+      const authed = !!teamSecret && String(msg.secret || "") === String(teamSecret);
       const user = {
         id: String((msg.user && msg.user.id) || "convidado"),
         name: String((msg.user && msg.user.name) || "Convidado"),
+        guest: !authed,
       };
       this.sessions.set(ws, user);
       const chat = await this.env.DB.prepare(
@@ -308,6 +305,7 @@ export class TeamRoom {
       ).all();
       this.send(ws, {
         t: "welcome",
+        authed: !user.guest,
         chat: (chat.results || []).reverse(),
         gallery: gallery.results || [],
         meta: meta.results || [],
@@ -393,6 +391,9 @@ export class TeamRoom {
     }
 
     if (msg.t === "gallery-publish" && msg.item) {
+      if (user.guest) {
+        return this.send(ws, { t: "error", message: "Código da equipe necessário para publicar." });
+      }
       const g = msg.item;
       const entry = {
         id: String(g.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`),

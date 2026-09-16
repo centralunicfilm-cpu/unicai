@@ -122,6 +122,7 @@ export default function Prompts() {
                         controls
                         preload="metadata"
                         playsInline
+                        poster={item.poster}
                         className="w-full h-full object-cover"
                       />
                     </div>

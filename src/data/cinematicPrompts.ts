@@ -13,6 +13,7 @@ export interface CinematicPrompt {
   source: string;
   sourceUrl: string;
   videos: string[];
+  poster?: string;
   target?: "video" | "image";
   thumbnail?: string;
   needsReference?: boolean;
@@ -44,6 +45,7 @@ The starting lights turn Green. Both cars accelerate in perfect sync on the wet 
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020515830874636716?s=20`,
     videos: ["https://github.com/user-attachments/assets/76ffff91-3b2b-47c4-953c-f9ff75834fe7"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-1.jpg",
   },
   {
     category: `Cinematic Film Styles`,
@@ -57,6 +59,7 @@ Duration: 15s.
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020794007291404726?s=20`,
     videos: ["https://github.com/user-attachments/assets/1ab84150-de21-4d8b-bf26-340676b4f066"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-2.jpg",
   },
   {
     category: `Cinematic Film Styles`,
@@ -90,6 +93,7 @@ Environment: Background is flowing city car lights forming elongated light trail
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020415877993156966?s=20`,
     videos: ["https://github.com/user-attachments/assets/a3be2f7e-a30b-4c7e-847b-447d315f6afe"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-3.jpg",
   },
   {
     category: `Cinematic Film Styles`,
@@ -129,6 +133,7 @@ Environment: Background is flowing city car lights forming elongated light trail
     source: `歸藏(guizang.ai) ([@op7418](https://x.com/op7418))`,
     sourceUrl: `https://x.com/op7418/status/2021260675960504802?s=20`,
     videos: ["https://github.com/user-attachments/assets/8ea42edb-d3c8-4fb8-8046-f59a3c1ddb1d"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-4.jpg",
   },
   {
     category: `Advertising & Commercial Branding`,
@@ -138,6 +143,7 @@ Environment: Background is flowing city car lights forming elongated light trail
     source: `Vicky ([@BFAVicky](https://x.com/BFAVicky))`,
     sourceUrl: `https://x.com/BFAVicky/status/2020267913316561195?s=20`,
     videos: ["https://github.com/user-attachments/assets/7c8e24b9-b203-417f-b18a-6a1611d7871a"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-5.jpg",
   },
   {
     category: `Advertising & Commercial Branding`,
@@ -171,6 +177,7 @@ Narrative sense: It lazily lies down and starts grooming itself, blocking the en
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020717903134204344?s=20`,
     videos: ["https://github.com/user-attachments/assets/2c0688fe-7733-4a20-8f1d-ec0d5c60527c"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-6.jpg",
   },
   {
     category: `Social Media & Viral Memes`,
@@ -202,6 +209,7 @@ Result: The mirror has now completely returned to normal, completely empty, only
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020788951678607813?s=20`,
     videos: ["https://github.com/user-attachments/assets/74c700e7-9371-4c1c-becf-ca3f9aadb357"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-7.jpg",
   },
   {
     category: `UGC Style`,
@@ -259,6 +267,7 @@ Style and atmosphere:
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020027994429911370?s=20`,
     videos: ["https://github.com/user-attachments/assets/76a2b32a-a7c7-42f7-af08-ea7ddcf3fed9"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-8.jpg",
   },
   {
     category: `Short-form Drama & Web Series`,
@@ -301,6 +310,7 @@ The main door is kicked open, two rows of black-clad bodyguards rush in, kneelin
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020688711172620665?s=20`,
     videos: ["https://github.com/user-attachments/assets/510355c2-6c53-4587-8f1a-9913a0a54bbb"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-9.jpg",
   },
   {
     category: `Visual Effects & Experimental Styles`,
@@ -322,6 +332,7 @@ Ending: The camera rapidly pulls back to reveal that our entire world (city/whea
     source: `John ([@johnAGI168](https://x.com/johnAGI168))`,
     sourceUrl: `https://x.com/johnAGI168/status/2020727853281628276?s=20`,
     videos: ["https://github.com/user-attachments/assets/ccf43991-7f39-4550-8845-4aff2cec3ed4"],
+    poster: "https://unicfilm-relay.central-unicfilm.workers.dev/img/posters/cp-10.jpg",
   },
   {
     category: `Visual Effects & Experimental Styles`,
@@ -348,7 +359,7 @@ Ending: The camera rapidly pulls back to reveal that our entire world (city/whea
     prompt: `Animate this image`,
     source: `Replicate Blog - How to make remarkable videos with Seedance 2.0*`,
     sourceUrl: `https://replicate.com/blog/seedance-2`,
-    videos: ["https://github.com/user-attachments/assets/99f1d923-b995-4bc7-ac6a-5fcf491ea7cd"],
+    videos: [],
   },
 ];
 

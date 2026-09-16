@@ -119,8 +119,6 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
     const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: "image" | "video"; prompt: string } | null>(null);
     const [lanInfo, setLanInfo] = useState(() => lanState());
     const [cloudInfo, setCloudInfo] = useState(() => cloudState());
-    const [teamCode, setTeamCode] = useState("");
-    const [joining, setJoining] = useState(false);
     const knownIdsRef = useRef<Set<string>>(new Set());
     const { user, profile } = useAuth();
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -231,14 +229,11 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
           }
         }
         if (!cloudConnected()) {
-          const host = savedCloudHost();
-          const secret = savedCloudSecret();
-          if (host && secret) {
-            void cloudConnect(host, secret, {
-              id: user.id,
-              name: profile?.full_name || user.email || "Usuário",
-            });
-          }
+          // Chat é aberto: conecta sozinho (com código salvo ou como convidado).
+          void cloudConnect(savedCloudHost(), savedCloudSecret(), {
+            id: user.id,
+            name: profile?.full_name || user.email || "Usuário",
+          });
         }
 
         setOnlineUsers(
@@ -265,23 +260,6 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
     useEffect(() => {
         if (isOpen && !isMinimized) scrollToBottom();
     }, [isOpen, isMinimized, sortedMessages]);
-
-    const joinTeam = async (e?: FormEvent) => {
-        if (e) e.preventDefault();
-        if (!user || joining || !teamCode.trim()) return;
-        setJoining(true);
-        const error = await cloudConnect(savedCloudHost() || DEFAULT_CLOUD_HOST, teamCode.trim(), {
-            id: user.id,
-            name: profile?.full_name || user.email?.split("@")[0] || "Usuário",
-        });
-        setJoining(false);
-        setCloudInfo(cloudState());
-        if (error) toast.error(error);
-        else {
-            setTeamCode("");
-            toast.success("Chat da equipe ativado!");
-        }
-    };
 
     const persistMessage = async (content: string, mediaUrl?: string, mediaType?: "image" | "video") => {
         if (!user) throw new Error("Usuário não autenticado");
@@ -387,7 +365,9 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
                                 <p className="mt-1 text-[10px] font-normal tracking-[0.08em] text-white/40">
                                     {lanInfo.state === "on"
                                         ? `Rede • ${lanInfo.clients.length + 1} online`
-                                        : "Chat geral • neste Mac"}
+                                        : cloudInfo.state === "on"
+                                            ? `Online • ${cloudInfo.clients.length + 1}`
+                                            : "Chat geral • neste Mac"}
                                 </p>
                             </div>
                         </div>
@@ -403,30 +383,11 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
 
                     {!isMinimized && (
                         <>
-                            {cloudInfo.state !== "on" && (
+                            {cloudInfo.state === "connecting" && (
                                 <div className="px-5 pt-4">
-                                    {cloudInfo.state === "connecting" || joining ? (
-                                        <p className="text-center text-[10px] font-bold uppercase tracking-widest text-orange animate-pulse">
-                                            Conectando ao chat da equipe...
-                                        </p>
-                                    ) : (
-                                        <form onSubmit={joinTeam} className="flex gap-2">
-                                            <input
-                                                value={teamCode}
-                                                onChange={(event) => setTeamCode(event.target.value)}
-                                                placeholder="Código da equipe (1ª vez)"
-                                                autoComplete="off"
-                                                className="flex-1 min-w-0 bg-black/40 border border-orange/30 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-white/25 focus:outline-none focus:border-orange transition-all"
-                                            />
-                                            <button
-                                                type="submit"
-                                                disabled={joining || !teamCode.trim()}
-                                                className="px-4 py-2.5 rounded-xl bg-orange text-white text-[10px] font-bold tracking-widest uppercase hover:brightness-110 transition-all disabled:opacity-40 shrink-0"
-                                            >
-                                                Entrar
-                                            </button>
-                                        </form>
-                                    )}
+                                    <p className="text-center text-[10px] font-bold uppercase tracking-widest text-orange animate-pulse">
+                                        Conectando ao chat da equipe...
+                                    </p>
                                 </div>
                             )}
                             <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto scrollbar-hide space-y-4">
