@@ -32,6 +32,11 @@ jobs:
       - run: pnpm build
         env:
           VITE_RUNWARE_API_KEY: ""
+          # Chaves públicas do Supabase (publishable/anon — feitas para ir no frontend).
+          # Sem elas o client estoura no boot e a demo abre em tela preta.
+          VITE_SUPABASE_URL: "https://ihexxwbejnjaawosgiby.supabase.co"
+          VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloZXh4d2Jlam5qYWF3b3NnaWJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA2NjcsImV4cCI6MjA4NzE3NjY2N30.NHMvYvIzYtbWRc3adH4mQfOarCMrvkaWjr0NwLPLD1E"
+          VITE_SUPABASE_PROJECT_ID: "ihexxwbejnjaawosgiby"
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
