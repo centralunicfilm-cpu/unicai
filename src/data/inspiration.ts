@@ -1,5 +1,5 @@
-// Galeria de inspiração (palcos) — arquivos em centralunicfilm-cpu/unicai-assets.
-// Gerado a partir de manifest.json do repo de assets.
+// Galeria de inspiração (palcos) — arquivos no R2 via Worker Cloudflare.
+// Repo backup: centralunicfilm-cpu/-unicai-assets-.
 
 export interface InspirationItem {
   url: string;
@@ -7,7 +7,7 @@ export interface InspirationItem {
   folder: string;
 }
 
-export const INSPIRATION_BASE = 'https://raw.githubusercontent.com/centralunicfilm-cpu/-unicai-assets-/main/';
+export const INSPIRATION_BASE = 'https://unicfilm-relay.central-unicfilm.workers.dev/img/insp/';
 
 export const INSPIRATION_ITEMS: InspirationItem[] = [
   { url: INSPIRATION_BASE + 'palco/jonsold-aerial-view-um-palco-de-show-modern-led-diamont-lambd-1.png', title: `Aerial view um palco de show modern led diamont lambd`, folder: 'palco' },
