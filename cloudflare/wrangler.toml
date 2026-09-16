@@ -6,7 +6,7 @@ compatibility_date = "2026-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "unicfilm-db"
-database_id = "PREENCHER-D1-ID"
+database_id = "f49c4a5f-8e1e-47e7-984c-eda6ab549255"
 
 [[r2_buckets]]
 binding = "MEDIA"

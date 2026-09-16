@@ -36,8 +36,8 @@ function dataUrlToBytes(dataUrl) {
 }
 
 // Mesma base de URL pública das imagens deste Worker.
-function imgUrlOf(request, key) {
-  const url = new URL(request.url);
+function imgUrlOf(requestUrl, key) {
+  const url = new URL(typeof requestUrl === "string" ? requestUrl : requestUrl.url);
   return `${url.origin}/img/${key}`;
 }
 
@@ -57,21 +57,30 @@ export class TeamRoom {
     const [client, server] = Object.values(pair);
     this.ctx.acceptWebSocket(server);
     this.sessions.set(server, null);
-    server.addEventListener("message", (event) => {
-      this.onMessage(server, String(event.data || ""), request).catch((err) => {
-        try {
-          server.send(JSON.stringify({ t: "error", message: "Erro interno." }));
-        } catch {}
-        console.error(err);
-      });
-    });
-    const close = () => {
-      this.sessions.delete(server);
-      this.broadcastClients();
-    };
-    server.addEventListener("close", close);
-    server.addEventListener("error", close);
+    this.lastRequestUrl = request.url;
     return new Response(null, { status: 101, webSocket: client });
+  }
+
+  async webSocketMessage(ws, message) {
+    try {
+      await this.onMessage(ws, typeof message === "string" ? message : String(message || ""), this.lastRequestUrl);
+    } catch (err) {
+      console.error(err);
+      this.send(ws, { t: "error", message: "Erro interno." });
+    }
+  }
+
+  async webSocketClose(ws) {
+    this.sessions.delete(ws);
+    this.broadcastClients();
+  }
+
+  async webSocketError(ws) {
+    try {
+      ws.close();
+    } catch {}
+    this.sessions.delete(ws);
+    this.broadcastClients();
   }
 
   send(ws, obj) {
