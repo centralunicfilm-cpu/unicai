@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
 import { resolveChat, sendChatMessage, subscribeChat, type ResolvedChatMessage } from "@/lib/localChat";
 import { forwardChatToHost, lanState, subscribeLan } from "@/lib/lanSync";
+import { forwardChatToCloud } from "@/lib/cloudSync";
 import { fileToDataUrl } from "@/lib/runware";
 
 interface Message {
@@ -247,8 +248,9 @@ const FloatingChat = forwardRef<HTMLDivElement>(function FloatingChat(_props, re
             sourceUrl: mediaUrl ?? null,
             mediaType: mediaType ?? null,
         });
-        // Espalha para os outros Macs quando conectado ao anfitrião.
+        // Espalha para os outros Macs (rede local) e para a nuvem (online).
         forwardChatToHost(inserted);
+        forwardChatToCloud(inserted);
         knownIdsRef.current.add(inserted.id);
         return toUiMessage({ ...inserted, displayUrl: mediaUrl ?? inserted.mediaUrl });
     };

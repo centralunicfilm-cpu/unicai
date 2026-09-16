@@ -11,6 +11,7 @@ import { generateVideoDirect, loadLocalHistory, saveLocalHistoryItem } from "@/l
 import { publishToGallery } from "@/lib/localGallery";
 import { sendChatMessage } from "@/lib/localChat";
 import { forwardChatToHost, forwardGalleryToHost } from "@/lib/lanSync";
+import { forwardChatToCloud, forwardGalleryToCloud } from "@/lib/cloudSync";
 import { VIDEO_PREFILL_KEY } from "@/pages/Prompts";
 
 const videoStyles = [
@@ -151,6 +152,7 @@ export default function VideoGen() {
           mediaType: "video",
         });
         forwardGalleryToHost(item);
+        forwardGalleryToCloud(item);
         toast.success("Vídeo publicado na galeria!");
       } else {
         const inserted = await sendChatMessage({
@@ -161,6 +163,7 @@ export default function VideoGen() {
           mediaType: "video",
         });
         forwardChatToHost(inserted);
+        forwardChatToCloud(inserted);
         toast.success("Vídeo e prompt enviados ao chat da equipe!");
       }
     } catch (e: any) {

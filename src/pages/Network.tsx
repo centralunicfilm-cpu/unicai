@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Wifi, Server, MonitorSmartphone, Loader2, Copy, Check, RefreshCw, Power, Unplug, Search } from "lucide-react";
+import { Wifi, Server, MonitorSmartphone, Loader2, Copy, Check, RefreshCw, Power, Unplug, Search, Cloud } from "lucide-react";
 import ToolPageLayout from "@/components/ToolPageLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -14,6 +14,13 @@ import {
   type DiscoveredHost,
   type LanHostInfo,
 } from "@/lib/lanSync";
+import {
+  cloudConnect,
+  cloudDisconnect,
+  cloudState,
+  savedCloudHost,
+  subscribeCloud,
+} from "@/lib/cloudSync";
 
 const LAST_HOST_KEY = "unicfilm.local.lan.host";
 
@@ -29,6 +36,10 @@ export default function Network() {
   const [copied, setCopied] = useState(false);
   const [found, setFound] = useState<DiscoveredHost[]>([]);
   const [scanning, setScanning] = useState(false);
+  const [cloud, setCloud] = useState(() => cloudState());
+  const [cloudBusy, setCloudBusy] = useState(false);
+  const [cloudHost, setCloudHost] = useState(() => savedCloudHost());
+  const [cloudSecret, setCloudSecret] = useState("");
 
   const refreshHost = async () => {
     if (!window.unicfilmLan) return;
@@ -42,15 +53,40 @@ export default function Network() {
   useEffect(() => {
     void refreshHost();
     const off = subscribeLan(() => setConn(lanState()));
+    const offCloud = subscribeCloud(() => setCloud(cloudState()));
     const timer = window.setInterval(() => {
       void refreshHost();
     }, 5000);
     return () => {
       off();
+      offCloud();
       window.clearInterval(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleCloudConnect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setCloudBusy(true);
+    const error = await cloudConnect(cloudHost, cloudSecret, {
+      id: user.id,
+      name: profile?.full_name || user.email,
+    });
+    setCloudBusy(false);
+    setCloud(cloudState());
+    if (error) toast.error(error);
+    else {
+      setCloudSecret("");
+      toast.success("Conectado ao relay online!");
+    }
+  };
+
+  const handleCloudDisconnect = () => {
+    cloudDisconnect();
+    setCloud(cloudState());
+    toast.success("Desconectado do relay.");
+  };
 
   const handleHostStart = async () => {
     if (!window.unicfilmLan) return;
@@ -312,6 +348,64 @@ export default function Network() {
               </button>
               <p className="text-[10px] text-[hsl(var(--text-dim))] leading-relaxed">
                 Os dois Macs precisam estar no mesmo Wi-Fi. Se desconectar, o app continua funcionando sozinho e tenta reconectar sozinho.
+              </p>
+            </form>
+          )}
+        </div>
+
+        {/* ONLINE (CLOUDFLARE) */}
+        <div className="bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-2xl p-6 space-y-5">
+          <div className="flex items-center gap-3">
+            <Cloud className="w-5 h-5 text-orange" />
+            <h3 className="text-xs font-bold tracking-widest uppercase text-[hsl(var(--text-secondary))]">Online via internet (Cloudflare)</h3>
+            <span className={`ml-auto w-2 h-2 rounded-full ${cloud.state === "on" ? "bg-green-500 animate-pulse" : "bg-white/20"}`} />
+          </div>
+
+          {cloud.state === "on" ? (
+            <div className="space-y-4">
+              <p className="text-xs text-[hsl(var(--text-dim))]">
+                Conectado ao relay <strong className="text-[hsl(var(--text-primary))]">{cloud.host}</strong> • {cloud.clients.length + 1} online. Chat e imagens sincronizam entre redes; vídeos ficam locais.
+              </p>
+              <button onClick={handleCloudDisconnect} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white/70 hover:text-white transition-colors">
+                <Unplug className="w-4 h-4" /> DESCONECTAR
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleCloudConnect} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold tracking-widest uppercase text-[hsl(var(--text-dim))] mb-2">URL do Worker</label>
+                  <input
+                    value={cloudHost}
+                    onChange={(e) => setCloudHost(e.target.value)}
+                    placeholder="unicfilm-relay.conta.workers.dev"
+                    required
+                    className="w-full px-4 py-3 bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-xl text-sm text-[hsl(var(--text-primary))] placeholder:text-[hsl(var(--text-dim))] focus:outline-none focus:border-orange transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold tracking-widest uppercase text-[hsl(var(--text-dim))] mb-2">Código da equipe</label>
+                  <input
+                    value={cloudSecret}
+                    onChange={(e) => setCloudSecret(e.target.value)}
+                    placeholder="Código secreto"
+                    required
+                    type="password"
+                    autoComplete="off"
+                    className="w-full px-4 py-3 bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-xl text-sm text-[hsl(var(--text-primary))] placeholder:text-[hsl(var(--text-dim))] focus:outline-none focus:border-orange transition-colors"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={cloudBusy || cloud.state === "connecting"}
+                className="w-full py-3.5 rounded-xl font-display text-lg tracking-widest text-[hsl(var(--primary-foreground))] bg-orange btn-glow flex items-center justify-center gap-2 disabled:opacity-40"
+              >
+                {cloudBusy || cloud.state === "connecting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Cloud className="w-4 h-4" />}
+                CONECTAR ONLINE
+              </button>
+              <p className="text-[10px] text-[hsl(var(--text-dim))] leading-relaxed">
+                Funciona de qualquer internet (inclusive na versão web). O código da equipe é definido no Worker — veja cloudflare/README.md. Imagens até 8MB viajam; vídeos ficam neste dispositivo.
               </p>
             </form>
           )}

@@ -4,6 +4,7 @@ import FullscreenViewer from "@/components/FullscreenViewer";
 import { publishToGallery } from "@/lib/localGallery";
 import { sendChatMessage } from "@/lib/localChat";
 import { forwardChatToHost, forwardGalleryToHost } from "@/lib/lanSync";
+import { forwardChatToCloud, forwardGalleryToCloud } from "@/lib/cloudSync";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import ToolPageLayout from "@/components/ToolPageLayout";
@@ -221,6 +222,7 @@ export default function ImageGen() {
         mediaType: "image",
       });
       forwardGalleryToHost(item);
+      forwardGalleryToCloud(item);
       toast.success("Publicado na galeria!");
     } catch (e: any) {
       toast.error(e?.message || "Erro ao publicar");
@@ -241,6 +243,7 @@ export default function ImageGen() {
         mediaType: "image",
       });
       forwardChatToHost(inserted);
+      forwardChatToCloud(inserted);
       toast.success("Imagem e prompt enviados ao chat da equipe!");
     } catch (e: any) {
       toast.error(e?.message || "Erro ao enviar para o chat");
