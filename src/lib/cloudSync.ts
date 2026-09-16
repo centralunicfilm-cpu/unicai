@@ -4,6 +4,7 @@
 
 import { mergeChatMessage, type ChatMessage } from "./localChat";
 import { mergeGalleryItem, type LocalGalleryItem } from "./localGallery";
+import { applyRemoteMeta, type MediaMeta } from "./mediaMeta";
 import { loadBlobDataUrl } from "./mediaCache";
 
 const CLOUD_HOST_KEY = "unicfilm.local.cloud.host";
@@ -146,6 +147,21 @@ async function openSocket(secret: string): Promise<string | null> {
             );
           }
           window.dispatchEvent(new CustomEvent("unicfilm:gallery"));
+          for (const entry of (msg.meta || []) as any[]) {
+            if (entry && entry.key) {
+              let tags: string[] = [];
+              try {
+                tags = typeof entry.tags === "string" ? JSON.parse(entry.tags) : entry.tags || [];
+              } catch {
+                tags = [];
+              }
+              applyRemoteMeta(String(entry.key), {
+                title: entry.title || undefined,
+                tags,
+                updatedAt: Number(entry.updatedAt || entry.updated_at) || 0,
+              });
+            }
+          }
           setState("on");
           done(null);
         } else if (msg.t === "chat-new" && msg.msg) {
@@ -177,6 +193,8 @@ async function openSocket(secret: string): Promise<string | null> {
             g.dataUrl ?? null
           );
           window.dispatchEvent(new CustomEvent("unicfilm:gallery"));
+        } else if (msg.t === "meta-new" && msg.key) {
+          applyRemoteMeta(String(msg.key), (msg.meta || {}) as MediaMeta);
         } else if (msg.t === "clients") {
           cloudClients = Array.isArray(msg.clients) ? msg.clients : [];
           emitCloud();
@@ -303,6 +321,16 @@ export function forwardChatToCloud(msg: ChatMessage) {
     }
     ws?.send(JSON.stringify({ t: "chat-post", msg, dataUrl }));
   })();
+}
+
+// Envia título/tags de uma imagem para a equipe.
+export function forwardMetaToCloud(key: string, meta: MediaMeta) {
+  if (!cloudConnected() || !ws) return;
+  try {
+    ws.send(JSON.stringify({ t: "meta-set", key, meta }));
+  } catch {
+    /* ignora */
+  }
 }
 
 // Envia item da galeria já publicado localmente (imagem ≤8MB; vídeo só metadados).

@@ -303,10 +303,14 @@ export class TeamRoom {
       )
         .bind(GALLERY_MAX)
         .all();
+      const meta = await this.env.DB.prepare(
+        "SELECT key, title, tags, updated_at AS updatedAt FROM meta LIMIT 5000"
+      ).all();
       this.send(ws, {
         t: "welcome",
         chat: (chat.results || []).reverse(),
         gallery: gallery.results || [],
+        meta: meta.results || [],
       });
       this.broadcastClients();
       return;
@@ -363,6 +367,29 @@ export class TeamRoom {
         .bind(CHAT_MAX)
         .run();
       return this.broadcast({ t: "chat-new", msg: entry });
+    }
+
+    if (msg.t === "meta-set" && msg.key) {
+      const key = String(msg.key).slice(0, 300);
+      const title = String((msg.meta && msg.meta.title) || "").slice(0, 120);
+      const tags = Array.isArray(msg.meta && msg.meta.tags)
+        ? msg.meta.tags.map((t) => String(t).toLowerCase().replace(/^#+/, "").trim()).filter(Boolean).slice(0, 20)
+        : [];
+      const updatedAt = Number(msg.meta && msg.meta.updatedAt) || Date.now();
+      const current = await this.env.DB.prepare(
+        "SELECT updated_at AS updatedAt FROM meta WHERE key = ?"
+      )
+        .bind(key)
+        .first();
+      if (!current || updatedAt >= Number(current.updatedAt || 0)) {
+        await this.env.DB.prepare(
+          "INSERT INTO meta (key, title, tags, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(key) DO UPDATE SET title = excluded.title, tags = excluded.tags, updated_at = excluded.updated_at"
+        )
+          .bind(key, title || null, JSON.stringify(tags), updatedAt)
+          .run();
+        this.broadcast({ t: "meta-new", key, meta: { title: title || undefined, tags, updatedAt } });
+      }
+      return;
     }
 
     if (msg.t === "gallery-publish" && msg.item) {
