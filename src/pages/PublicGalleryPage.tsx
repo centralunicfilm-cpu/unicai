@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Filter, Image as ImageIcon, Film, Download, Maximize2, Trash2 } from "lucide-react";
+import { Filter, Image as ImageIcon, Film, Download, Maximize2, Trash2, Pencil, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
 import FullscreenViewer from "@/components/FullscreenViewer";
+import MediaMetaEditor from "@/components/MediaMetaEditor";
 import { resolveGallery, removeFromGallery, type ResolvedGalleryItem } from "@/lib/localGallery";
+import { displayTitle, getMeta, matchesMeta, subscribeMeta } from "@/lib/mediaMeta";
 
 type GalleryFilter = "all" | "video" | "image" | "thumbnail" | "audio";
 
@@ -36,6 +38,11 @@ export default function PublicGalleryPage() {
   const [items, setItems] = useState<ResolvedGalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [fsIndex, setFsIndex] = useState<number | null>(null);
+  const [galQuery, setGalQuery] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [metaTick, setMetaTick] = useState(0);
+
+  useEffect(() => subscribeMeta(() => setMetaTick((t) => t + 1)), []);
 
   useEffect(() => {
     setActiveFilter(normalizeFilter(params.filter));
@@ -78,10 +85,16 @@ export default function PublicGalleryPage() {
   ];
 
   const filteredItems = useMemo(() => {
-    if (activeFilter === "all") return items;
-    if (activeFilter === "image") return items.filter((item) => item.mediaType === "image" || item.mediaType === "thumbnail");
-    return items.filter((item) => item.mediaType === activeFilter);
-  }, [items, activeFilter]);
+    void metaTick;
+    const byType = activeFilter === "all"
+      ? items
+      : activeFilter === "image"
+        ? items.filter((item) => item.mediaType === "image" || item.mediaType === "thumbnail")
+        : items.filter((item) => item.mediaType === activeFilter);
+    return byType.filter((item) =>
+      matchesMeta(galQuery, getMeta(`gallery:${item.id}`), [item.content, item.fullName])
+    );
+  }, [items, activeFilter, galQuery, metaTick]);
 
   return (
     <div className="flex-1 overflow-y-auto px-6 md:px-10 py-10 max-w-[1400px] mx-auto w-full space-y-8">
@@ -95,6 +108,15 @@ export default function PublicGalleryPage() {
       </header>
 
       <section className="space-y-5">
+        <div className="relative max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+          <input
+            value={galQuery}
+            onChange={(e) => setGalQuery(e.target.value)}
+            placeholder="Buscar por título, #tag, autor..."
+            className="w-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-2xl pl-12 pr-4 py-3 text-sm text-[hsl(var(--text-primary))] placeholder:text-[hsl(var(--text-dim))] focus:outline-none focus:border-orange/50 transition-all"
+          />
+        </div>
         <div className="flex items-center gap-3 flex-wrap">
           <Filter className="w-4 h-4 text-[hsl(var(--text-dim))]" />
           {filterOptions.map((option) => (
@@ -151,6 +173,15 @@ export default function PublicGalleryPage() {
                     >
                       {item.mediaType === "video" ? <Maximize2 className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(item.id)}
+                      className="p-2 rounded-lg bg-black/60 text-white/60 hover:text-orange transition-colors"
+                      aria-label="Renomear / tags"
+                      title="Renomear / tags"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
                     {canDelete(item) && (
                       <button
                         type="button"
@@ -174,7 +205,12 @@ export default function PublicGalleryPage() {
                       {new Date(item.createdAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  <p className="text-xs text-[hsl(var(--text-secondary))] line-clamp-2">{item.content || "Sem texto"}</p>
+                  <p className="text-xs text-[hsl(var(--text-secondary))] line-clamp-2">{displayTitle(item.content, getMeta(`gallery:${item.id}`)) || "Sem texto"}</p>
+                  {getMeta(`gallery:${item.id}`).tags.length > 0 && (
+                    <p className="truncate text-[10px] text-orange/70">
+                      {getMeta(`gallery:${item.id}`).tags.map((t) => `#${t}`).join(" ")}
+                    </p>
+                  )}
                   <button
                     type="button"
                     onClick={() => downloadOriginalMedia(
@@ -191,6 +227,14 @@ export default function PublicGalleryPage() {
           </div>
         )}
       </section>
+
+      {editingId && (
+        <MediaMetaEditor
+          metaKey={`gallery:${editingId}`}
+          fallbackTitle={filteredItems.find((i) => i.id === editingId)?.content || items.find((i) => i.id === editingId)?.content || "Publicação"}
+          onClose={() => setEditingId(null)}
+        />
+      )}
 
       {fsIndex !== null && filteredItems[fsIndex] && (
         <FullscreenViewer

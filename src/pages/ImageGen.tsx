@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Image, Download, Loader2, Wand2, Images, MessagesSquare, Maximize2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Image, Download, Loader2, Wand2, Images, MessagesSquare, Maximize2, Pencil, Search } from "lucide-react";
 import FullscreenViewer from "@/components/FullscreenViewer";
 import { publishToGallery } from "@/lib/localGallery";
 import { sendChatMessage } from "@/lib/localChat";
@@ -13,6 +13,8 @@ import EngineSwitchNotice from "@/components/EngineSwitchNotice";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
 import { generateImageDirect, getRunwareKey, fileToDataUrl, loadLocalHistory, saveLocalHistoryItem } from "@/lib/runware";
 import { cloudAIReady, generateImageViaCloud } from "@/lib/cloudAI";
+import MediaMetaEditor from "@/components/MediaMetaEditor";
+import { displayTitle, getMeta, matchesMeta, subscribeMeta } from "@/lib/mediaMeta";
 import TeamCodeGate from "@/components/TeamCodeGate";
 import { fetchAndCache, loadBlobUrl } from "@/lib/mediaCache";
 import { IMAGE_PREFILL_KEY } from "@/pages/Prompts";
@@ -61,7 +63,18 @@ export default function ImageGen() {
   const [error, setError] = useState<string | null>(null);
   const [referenceImages, setReferenceImages] = useState<ReferenceImage[]>([]);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
+  const [galQuery, setGalQuery] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [, setMetaTick] = useState(0);
   const engineNoticeCount = useRef(0);
+
+  useEffect(() => subscribeMeta(() => setMetaTick((t) => t + 1)), []);
+
+  const visibleImages = useMemo(() => {
+    return generatedImages.filter((image) =>
+      matchesMeta(galQuery, getMeta(`history:${image.id}`), [image.prompt, image.engine])
+    );
+  }, [generatedImages, galQuery]);
   const [engineNotice, setEngineNotice] = useState({ open: false, previous: "", next: "" });
 
   const selectEngine = (nextEngine: string) => {
@@ -438,12 +451,24 @@ export default function ImageGen() {
               <h2 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--text-secondary))]">
                 Galeria de Imagens Geradas
               </h2>
-              <span className="text-[10px] font-bold text-white/30">{generatedImages.length} imagens</span>
+              <span className="text-[10px] font-bold text-white/30">{visibleImages.length}/{generatedImages.length} imagens</span>
             </div>
 
-            {generatedImages.length > 0 ? (
+            {generatedImages.length > 0 && (
+              <div className="relative mb-4 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                <input
+                  value={galQuery}
+                  onChange={(e) => setGalQuery(e.target.value)}
+                  placeholder="Buscar por título, #tag, engine..."
+                  className="w-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[hsl(var(--text-primary))] placeholder:text-[hsl(var(--text-dim))] focus:outline-none focus:border-orange/50 transition-all"
+                />
+              </div>
+            )}
+
+            {visibleImages.length > 0 ? (
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                {generatedImages.map((image, i) => (
+                {visibleImages.map((image, i) => (
                   <article key={image.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-[hsl(var(--surface))]">
                     <button
                       type="button"
@@ -457,27 +482,43 @@ export default function ImageGen() {
                         {image.engine}
                       </span>
                     </button>
-                    <div className="flex items-center gap-3 p-3">
-                      <p className="min-w-0 flex-1 truncate text-xs text-white/60" title={image.prompt}>{image.prompt}</p>
-                      <button
-                        type="button"
-                        onClick={() => setFsGalIndex(i)}
-                        className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange"
-                        aria-label="Ver em tela cheia"
-                        title="Tela cheia"
-                      >
-                        <Maximize2 className="h-4 w-4" />
-                      </button>
-                      <a
-                        href={image.url}
-                        download="unicfilm-image.png"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange"
-                        aria-label="Baixar imagem"
-                      >
-                        <Download className="h-4 w-4" />
-                      </a>
+                    <div className="p-3 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <p className="min-w-0 flex-1 truncate text-xs text-white/60" title={displayTitle(image.prompt, getMeta(`history:${image.id}`))}>{displayTitle(image.prompt, getMeta(`history:${image.id}`))}</p>
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(image.id)}
+                          className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange shrink-0"
+                          aria-label="Renomear / tags"
+                          title="Renomear / tags"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFsGalIndex(i)}
+                          className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange shrink-0"
+                          aria-label="Ver em tela cheia"
+                          title="Tela cheia"
+                        >
+                          <Maximize2 className="h-4 w-4" />
+                        </button>
+                        <a
+                          href={image.url}
+                          download="unicfilm-image.png"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange shrink-0"
+                          aria-label="Baixar imagem"
+                        >
+                          <Download className="h-4 w-4" />
+                        </a>
+                      </div>
+                      {getMeta(`history:${image.id}`).tags.length > 0 && (
+                        <p className="truncate text-[10px] text-orange/70">
+                          {getMeta(`history:${image.id}`).tags.map((t) => `#${t}`).join(" ")}
+                        </p>
+                      )}
                     </div>
                   </article>
                 ))}
@@ -498,15 +539,22 @@ export default function ImageGen() {
           onClose={() => setFullscreenUrl(null)}
         />
       )}
-      {fsGalIndex !== null && generatedImages[fsGalIndex] && (
+      {fsGalIndex !== null && visibleImages[fsGalIndex] && (
         <FullscreenViewer
-          url={generatedImages[fsGalIndex].url}
+          url={visibleImages[fsGalIndex].url}
           type="image"
           fileName="unicfilm-image.png"
           onClose={() => setFsGalIndex(null)}
-          items={generatedImages.map((g) => ({ url: g.url, type: "image" as const, fileName: "unicfilm-image.png" }))}
+          items={visibleImages.map((g) => ({ url: g.url, type: "image" as const, fileName: "unicfilm-image.png" }))}
           index={fsGalIndex}
           onIndexChange={setFsGalIndex}
+        />
+      )}
+      {editingId && (
+        <MediaMetaEditor
+          metaKey={`history:${editingId}`}
+          fallbackTitle={generatedImages.find((g) => g.id === editingId)?.prompt || "Imagem"}
+          onClose={() => setEditingId(null)}
         />
       )}
     </ToolPageLayout>

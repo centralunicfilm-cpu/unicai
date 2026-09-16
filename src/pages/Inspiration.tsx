@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
-import { Image as ImageIcon, Search, Maximize2, Download } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Image as ImageIcon, Search, Maximize2, Download, Pencil } from "lucide-react";
 import ToolPageLayout from "@/components/ToolPageLayout";
 import FullscreenViewer from "@/components/FullscreenViewer";
+import MediaMetaEditor from "@/components/MediaMetaEditor";
 import { INSPIRATION_ITEMS, INSPIRATION_FOLDERS } from "@/data/inspiration";
 import { downloadOriginalMedia } from "@/lib/sharedMedia";
+import { displayTitle, getMeta, matchesMeta, subscribeMeta } from "@/lib/mediaMeta";
 
 const FOLDER_LABELS: Record<string, string> = {
   "palco": "Palco",
@@ -16,15 +18,20 @@ export default function Inspiration() {
   const [query, setQuery] = useState("");
   const [folder, setFolder] = useState<string>("all");
   const [fsIndex, setFsIndex] = useState<number | null>(null);
+  const [editingUrl, setEditingUrl] = useState<string | null>(null);
+  const [metaTick, setMetaTick] = useState(0);
+
+  useEffect(() => subscribeMeta(() => setMetaTick((t) => t + 1)), []);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    void metaTick;
     return INSPIRATION_ITEMS.filter((item) => {
       if (folder !== "all" && item.folder !== folder) return false;
-      if (!q) return true;
-      return item.title.toLowerCase().includes(q);
+      // Busca por título, #tags e pasta.
+      const meta = getMeta(`insp:${item.url}`);
+      return matchesMeta(query, meta, [item.title, item.folder]);
     });
-  }, [query, folder]);
+  }, [query, folder, metaTick]);
 
   return (
     <ToolPageLayout
@@ -90,23 +97,47 @@ export default function Inspiration() {
                     <Maximize2 className="h-4 w-4" />
                   </span>
                 </button>
-                <div className="flex items-center gap-2 p-3">
-                  <p className="min-w-0 flex-1 truncate text-xs text-white/60" title={item.title}>{item.title}</p>
-                  <button
-                    type="button"
-                    onClick={() => downloadOriginalMedia(item.url, "inspiracao-palco.png")}
-                    className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange"
-                    aria-label="Baixar"
-                    title="Baixar"
-                  >
-                    <Download className="h-4 w-4" />
-                  </button>
+                <div className="p-3 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <p className="min-w-0 flex-1 truncate text-xs text-white/60" title={displayTitle(item.title, getMeta(`insp:${item.url}`))}>{displayTitle(item.title, getMeta(`insp:${item.url}`))}</p>
+                    <button
+                      type="button"
+                      onClick={() => setEditingUrl(item.url)}
+                      className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange shrink-0"
+                      aria-label="Renomear / tags"
+                      title="Renomear / tags"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => downloadOriginalMedia(item.url, "inspiracao-palco.png")}
+                      className="rounded-lg border border-white/10 p-2 text-white/40 transition-colors hover:border-orange/40 hover:text-orange shrink-0"
+                      aria-label="Baixar"
+                      title="Baixar"
+                    >
+                      <Download className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {getMeta(`insp:${item.url}`).tags.length > 0 && (
+                    <p className="truncate text-[10px] text-orange/70">
+                      {getMeta(`insp:${item.url}`).tags.map((t) => `#${t}`).join(" ")}
+                    </p>
+                  )}
                 </div>
               </article>
             ))}
           </div>
         )}
       </div>
+
+      {editingUrl && (
+        <MediaMetaEditor
+          metaKey={`insp:${editingUrl}`}
+          fallbackTitle={INSPIRATION_ITEMS.find((i) => i.url === editingUrl)?.title || "Imagem"}
+          onClose={() => setEditingUrl(null)}
+        />
+      )}
 
       {fsIndex !== null && filtered[fsIndex] && (
         <FullscreenViewer
